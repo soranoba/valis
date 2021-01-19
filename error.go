@@ -6,12 +6,14 @@ import (
 )
 
 type (
+	// ValidationError is an error returned by Validator.Validate by default.
 	ValidationError struct {
-		details      map[Location]*ErrorDetail
+		details      []LocationAndErrorDetail
 		nameResolver LocationNameResolver
 		cacheMessage string
 	}
 
+	// ErrorDetail is the error content created by each Rule.
 	ErrorDetail struct {
 		// Code is the type code of the ErrorDetail.
 		Code string
@@ -28,6 +30,12 @@ type (
 		Err error
 	}
 
+	LocationAndErrorDetail struct {
+		Location Location
+		ErrorDetail *ErrorDetail
+	}
+
+	// ErrorCollector is an interface that receives some ErrorDetail of each rule and creates the error returned by Validator.Validate.
 	ErrorCollector interface {
 		HasError() bool
 		Add(loc Location, detail *ErrorDetail)
@@ -39,15 +47,17 @@ type (
 type (
 	standardErrorCollector struct {
 		nameResolver LocationNameResolver
-		details      map[Location]*ErrorDetail
+		details     []LocationAndErrorDetail
 	}
+
 )
 
-func NewValidationError(nameResolver LocationNameResolver, details map[Location]*ErrorDetail) *ValidationError {
+// NewValidationError returns a new ValidationError.
+func NewValidationError(nameResolver LocationNameResolver, details []LocationAndErrorDetail) *ValidationError {
 	return &ValidationError{details: details, nameResolver: nameResolver}
 }
 
-func (e *ValidationError) Details() map[Location]*ErrorDetail {
+func (e *ValidationError) Details() []LocationAndErrorDetail {
 	return e.details
 }
 
@@ -57,10 +67,11 @@ func (e *ValidationError) Error() string {
 	}
 
 	messages := make([]string, 0)
-	for loc, detail := range e.details {
+	for _, locDetail := range e.details {
 		var msg string
 
-		name := e.nameResolver.ResolveLocationName(loc)
+		name := e.nameResolver.ResolveLocationName(locDetail.Location)
+		detail := locDetail.ErrorDetail
 		if name == "" {
 			msg = fmt.Sprintf("(%s) %s, but got %#v", detail.Code, detail.Err.Error(), detail.Value)
 		} else {
@@ -75,9 +86,10 @@ func (e *ValidationError) Error() string {
 	return e.cacheMessage
 }
 
+// NewStandardErrorCollector returns an ErrorCollector used by default.
 func NewStandardErrorCollector(nameResolver LocationNameResolver) ErrorCollector {
 	return &standardErrorCollector{
-		details:      make(map[Location]*ErrorDetail),
+		details:      make([]LocationAndErrorDetail, 0),
 		nameResolver: nameResolver,
 	}
 }
@@ -87,7 +99,7 @@ func (c *standardErrorCollector) HasError() bool {
 }
 
 func (c *standardErrorCollector) Add(loc Location, detail *ErrorDetail) {
-	c.details[loc] = detail
+	c.details = append(c.details, LocationAndErrorDetail{loc, detail})
 }
 
 func (c *standardErrorCollector) MakeError() error {

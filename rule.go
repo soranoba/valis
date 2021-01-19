@@ -5,14 +5,18 @@ import (
 )
 
 type (
+	// Rule is an interface where verification contents are defined.
 	Rule interface {
 		Validate(validator *Validator, value interface{})
 	}
+	// CombinationRule is a high-order function that returns a new Rule.
 	CombinationRule func(rules ...Rule) Rule
 
+	// If implemented, Validate will be executed by the ValidatableRule.
 	Validatable interface {
 		Validate() error
 	}
+	// If implemented, ValidatableWithValidator will be executed by the ValidatableRule.
 	ValidatableWithValidator interface {
 		Validate(validator *Validator)
 	}
@@ -28,9 +32,11 @@ const (
 )
 
 var (
+	// StandardRules is common rules by default.
 	StandardRules = [...]Rule{
 		ValidatableRule,
 	}
+	// ValidatableRule is a rule that executes Validate methods if the value implements Validatable or ValidatableWithValidator at verifying.
 	ValidatableRule Rule = &validatableRule{}
 )
 

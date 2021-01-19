@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func Split(sep string) valis.CombinationRule {
+func Split(sep string, rules ...valis.Rule) valis.Rule {
 	return valis.To(func(value interface{}) (interface{}, error) {
 		val := reflect.ValueOf(value)
 		for val.Kind() == reflect.Ptr {
@@ -17,5 +17,5 @@ func Split(sep string) valis.CombinationRule {
 			return nil, errors.New("cannot be split")
 		}
 		return strings.Split(val.Interface().(string), sep), nil
-	})
+	}, rules...)
 }

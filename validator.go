@@ -14,11 +14,13 @@ type (
 	}
 	// CloneOpts is an option of Clone.
 	CloneOpts struct {
-		// When KeepLocation is true, Clone keeps the Location.
-		KeepLocation bool
-		// When KeepErrorCollector is true, Clone keeps the ErrorCollector.
-		KeepErrorCollector bool
-		// When ErrorCollector is not nil and KeepErrorCollector is false, Clone set the ErrorCollector to the new Validator.
+		// When InheritLocation is true, Clone keeps the Location.
+		InheritLocation bool
+		// When InheritErrorCollector is true, Clone keeps the ErrorCollector.
+		InheritErrorCollector bool
+		// When Location is not nil and InheritLocation is false, Clone set the Location to the new Validator.
+		Location Location
+		// When ErrorCollector is not nil and InheritErrorCollector is false, Clone set the ErrorCollector to the new Validator.
 		ErrorCollector ErrorCollector
 	}
 )
@@ -42,10 +44,7 @@ func (v *Validator) SetCommonRules(rules ...Rule) {
 
 // AddCommonRules add the rules to common rules.
 func (v *Validator) AddCommonRules(rules ...Rule) {
-	commonRules := make([]Rule, len(v.commonRules)+len(rules))
-	copy(commonRules, v.commonRules)
-	copy(commonRules[len(v.commonRules):], rules)
-	v.commonRules = commonRules
+	v.commonRules = append(v.commonRules, rules...)
 }
 
 // SetErrorCollectorFactoryFunc is update ErrorCollectorFactoryFunc.
@@ -56,15 +55,21 @@ func (v *Validator) SetErrorCollectorFactoryFunc(f ErrorCollectorFactoryFunc) {
 // Clone returns a new Validator inheriting the settings.
 func (v *Validator) Clone(opts *CloneOpts) *Validator {
 	newValidator := *v
-	if !opts.KeepErrorCollector {
+	if opts.InheritErrorCollector {
+		newValidator.errorCollector = v.ErrorCollector()
+	} else {
 		if opts.ErrorCollector != nil {
 			newValidator.errorCollector = opts.ErrorCollector
 		} else {
 			newValidator.errorCollector = nil
 		}
 	}
-	if !opts.KeepLocation {
-		newValidator.loc = NewLocation()
+	if !opts.InheritLocation {
+		if opts.Location != nil {
+			newValidator.loc = opts.Location
+		} else {
+			newValidator.loc = NewLocation()
+		}
 	}
 	return &newValidator
 }
@@ -74,26 +79,19 @@ func (v *Validator) Location() Location {
 	return v.loc
 }
 
-// WithLocation returns a new Validator with the location.
-func (v *Validator) WithLocation(loc Location) *Validator {
-	newValidator := *v
-	newValidator.loc = loc
-	return &newValidator
-}
-
-// WithField is equiv to v.WithLocation(v.Location().FieldLocation(field))
+// WithField is equiv to v.Clone(&CloneOpts{InheritErrorCollector: true, Location: v.Location().FieldLocation(field)})
 func (v *Validator) WithField(field reflect.StructField) *Validator {
-	return v.WithLocation(v.Location().FieldLocation(field))
+	return v.Clone(&CloneOpts{InheritErrorCollector: true, Location: v.Location().FieldLocation(field)})
 }
 
-// WithIndex is equiv to v.WithLocation(v.Location().IndexLocation(index))
+// WithIndex is equiv to v.Clone(&CloneOpts{InheritErrorCollector: true, Location: v.Location().IndexLocation(index)})
 func (v *Validator) WithIndex(index int) *Validator {
-	return v.WithLocation(v.Location().IndexLocation(index))
+	return v.Clone(&CloneOpts{InheritErrorCollector: true, Location: v.Location().IndexLocation(index)})
 }
 
-// WithKey is equiv to v.WithLocation(v.Location().KeyLocation(key))
-func (v *Validator) WithKey(key interface{}) *Validator {
-	return v.WithLocation(v.Location().KeyLocation(key))
+// WithKey is equiv to v.Clone(&CloneOpts{InheritErrorCollector: true, Location: v.Location().MapValueLocation(key)})
+func (v *Validator) WithMapKey(key interface{}) *Validator {
+	return v.Clone(&CloneOpts{InheritErrorCollector: true, Location: v.Location().MapValueLocation(key)})
 }
 
 // ErrorCollector returns an ErrorCollector.
@@ -112,9 +110,8 @@ func (v *Validator) ErrorCollector() ErrorCollector {
 // It returns an error if any rules are not met.
 func (v *Validator) Validate(value interface{}, rules ...Rule) error {
 	newValidator := v.Clone(&CloneOpts{})
-	for _, rule := range append(v.commonRules, rules...) {
-		rule.Validate(newValidator, value)
-	}
+	And(rules...).Validate(newValidator, value)
+
 	if newValidator.ErrorCollector().HasError() {
 		return newValidator.ErrorCollector().MakeError()
 	}

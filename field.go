@@ -2,18 +2,24 @@ package valis
 
 import (
 	"errors"
+	valishelpers "github.com/soranoba/valis/helpers"
 	"reflect"
 )
 
 type (
 	fieldRule struct {
-		fieldValue reflect.Value
+		fieldPtr interface{}
 		rules      []Rule
 	}
 )
 
-func Field(filedValue interface{}, rules ...Rule) Rule {
-	return &fieldRule{fieldValue: reflect.ValueOf(filedValue), rules: rules}
+// Field returns a new rule that verifies the filed value meets the rules and all common rules.
+func Field(fieldPtr interface{}, rules ...Rule) Rule {
+	val := reflect.ValueOf(fieldPtr)
+	if val.Kind() != reflect.Ptr {
+		panic("fieldPtr must be a pointer of any field")
+	}
+	return &fieldRule{fieldPtr: fieldPtr, rules: rules}
 }
 
 func (r *fieldRule) Validate(validator *Validator, value interface{}) {
@@ -28,17 +34,11 @@ func (r *fieldRule) Validate(validator *Validator, value interface{}) {
 			r,
 			value,
 			nil,
-			errors.New("must be struct"),
+			errors.New("must be a struct"),
 		})
+		return
 	}
 
-	for i := 0; i < val.NumField(); i++ {
-		f := val.Field(i)
-		if r.fieldValue == f {
-			for _, rule := range r.rules {
-				loc := validator.Location().FieldLocation(val.Type().Field(i))
-				rule.Validate(validator.WithLocation(loc), r.fieldValue.Interface())
-			}
-		}
-	}
+	field := valishelpers.GetField(value, r.fieldPtr)
+	And(r.rules...).Validate(validator.WithField(field), reflect.ValueOf(r.fieldPtr).Elem().Interface())
 }

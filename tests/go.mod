@@ -3,6 +3,7 @@ module github.com/soranoba/valis/tests
 go 1.15
 
 require (
+	github.com/soranoba/henge v1.0.1
 	github.com/soranoba/valis v0.0.0
 	github.com/soranoba/valis/to v0.0.0
 	github.com/stretchr/testify v1.7.0

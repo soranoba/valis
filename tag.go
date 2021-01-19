@@ -13,7 +13,8 @@ type (
 	}
 )
 
-func TagRule(key string, ruleFunc TagRuleFunc) Rule {
+// NewTagRule returns a new rule, that call ruleFunc when it found any fields that have the tag.
+func NewTagRule(key string, ruleFunc TagRuleFunc) Rule {
 	return &tagRule{key: key, ruleFunc: ruleFunc}
 }
 
@@ -35,7 +36,7 @@ func (r *tagRule) Validate(validator *Validator, value interface{}) {
 
 		field := val.Type().Field(i)
 		if tag := field.Tag.Get(r.key); tag != "" {
-			newValidator := validator.WithLocation(validator.Location().FieldLocation(field))
+			newValidator := validator.WithField(field)
 			fieldValue := fieldVal.Interface()
 			for _, rule := range r.ruleFunc(tag) {
 				rule.Validate(newValidator, fieldValue)

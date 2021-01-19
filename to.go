@@ -20,12 +20,9 @@ const (
 	ConvertToCode = "convert_to"
 )
 
-func To(convertFunc ConvertFunc) CombinationRule {
-	toRule := &toRule{convertFunc: convertFunc}
-	return func(rules ...Rule) Rule {
-		toRule.rules = rules
-		return toRule
-	}
+// To returns a new rule that verifies the converted value met all rules.
+func To(convertFunc ConvertFunc, rules ...Rule) Rule {
+	return &toRule{convertFunc: convertFunc, rules: rules}
 }
 
 func (rule *toRule) Validate(validator *Validator, value interface{}) {
@@ -42,10 +39,8 @@ func (rule *toRule) Validate(validator *Validator, value interface{}) {
 	}
 
 	errorCollector := newToRuleErrorCollector(validator.ErrorCollector(), validator.Location(), value)
-	newValidator := validator.Clone(&CloneOpts{KeepLocation: true, ErrorCollector: errorCollector})
-	for _, rule := range rule.rules {
-		rule.Validate(newValidator, newValue)
-	}
+	newValidator := validator.Clone(&CloneOpts{InheritLocation: true, ErrorCollector: errorCollector})
+	And(rule.rules...).Validate(newValidator, newValue)
 }
 
 func newToRuleErrorCollector(errorCollector ErrorCollector, location Location, value interface{}) ErrorCollector {

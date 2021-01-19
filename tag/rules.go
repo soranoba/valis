@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	Required = valis.TagRule("required", requiredRules)
+	Required = valis.NewTagRule("required", requiredRules)
 )
 
 func requiredRules(tagValue string) []valis.Rule {

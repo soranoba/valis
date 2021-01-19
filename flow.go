@@ -6,17 +6,19 @@ import (
 )
 
 type (
-	ConditionFunc func(value interface{}) bool
-
-	OrRule struct {
-		Rules []Rule
-	}
-	EachRule struct {
-		Rules []Rule
-	}
+	ConditionFunc func(interface{}) bool
 )
 
 type (
+	andRule struct {
+		rules []Rule
+	}
+	orRule struct {
+		rules []Rule
+	}
+	eachRule struct {
+		rules []Rule
+	}
 	whenRule struct {
 		cond  ConditionFunc
 		rules []Rule
@@ -28,13 +30,26 @@ const (
 	InvalidTypeCode = "invalid_type"
 )
 
-func Or(rules ...Rule) Rule {
-	return &OrRule{Rules: rules}
+// And returns a new rule that verifies the value meets the rules and all common rules.
+func And(rules ...Rule) Rule {
+	return &andRule{rules: rules}
 }
 
-func (r *OrRule) Validate(validator *Validator, value interface{}) {
-	for _, rule := range r.Rules {
-		newValidator := validator.Clone(&CloneOpts{KeepLocation: true})
+func (r *andRule) Validate(validator *Validator, value interface{}) {
+	rules := append(validator.commonRules, r.rules...)
+	for _, rule := range rules {
+		rule.Validate(validator, value)
+	}
+}
+
+// Or returns a new rule that verifies the value meets the rules at least one.
+func Or(rules ...Rule) Rule {
+	return &orRule{rules: rules}
+}
+
+func (r *orRule) Validate(validator *Validator, value interface{}) {
+	for _, rule := range r.rules {
+		newValidator := validator.Clone(&CloneOpts{InheritLocation: true})
 		rule.Validate(newValidator, value)
 		if !newValidator.ErrorCollector().HasError() {
 			return
@@ -49,23 +64,23 @@ func (r *OrRule) Validate(validator *Validator, value interface{}) {
 	})
 }
 
+// When returns a new rule that verifies the value meets the rules and all common rules when cond returns true.
 func When(cond ConditionFunc, rules ...Rule) Rule {
 	return &whenRule{cond: cond, rules: rules}
 }
 
 func (r *whenRule) Validate(validator *Validator, value interface{}) {
 	if r.cond(value) {
-		for _, rule := range r.rules {
-			rule.Validate(validator, value)
-		}
+		And(r.rules...).Validate(validator, value)
 	}
 }
 
+// Each returns a new rule that verifies all elements of the array or slice meet the rules and all common rules.
 func Each(rules ...Rule) Rule {
-	return &EachRule{Rules: rules}
+	return &eachRule{rules: rules}
 }
 
-func (rule *EachRule) Validate(validator *Validator, value interface{}) {
+func (rule *eachRule) Validate(validator *Validator, value interface{}) {
 	val := reflect.ValueOf(value)
 	for val.Kind() == reflect.Ptr {
 		val = val.Elem()
@@ -75,9 +90,7 @@ func (rule *EachRule) Validate(validator *Validator, value interface{}) {
 	case reflect.Slice, reflect.Array:
 		for i := 0; i < val.Len(); i++ {
 			v := val.Index(i)
-			for _, r := range rule.Rules {
-				r.Validate(validator.WithLocation(validator.Location().IndexLocation(i)), v.Interface())
-			}
+			And(rule.rules...).Validate(validator.WithIndex(i), v.Interface())
 		}
 	default:
 		validator.ErrorCollector().Add(validator.Location(), &ErrorDetail{
