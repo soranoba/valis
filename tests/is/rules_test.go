@@ -40,7 +40,7 @@ func TestZero(t *testing.T) {
 	assert.EqualError(v.Validate(1, is.Zero), "(zero) must be nil or zero, but got 1")
 	assert.EqualError(v.Validate([...]string{"a"}, is.Zero), "(zero) must be nil or zero, but got [1]string{\"a\"}")
 	assert.EqualError(
-		v.Validate(struct { Name string } { Name: "aaa"}, is.Zero),
+		v.Validate(struct{ Name string }{Name: "aaa"}, is.Zero),
 		"(zero) must be nil or zero, but got struct { Name string }{Name:\"aaa\"}",
 	)
 
@@ -66,7 +66,7 @@ func TestNilOrNonZero(t *testing.T) {
 	assert.NoError(v.Validate("a", is.NilOrNonZero))
 	assert.NoError(v.Validate([]string{"aaa"}, is.NilOrNonZero))
 	assert.NoError(v.Validate(henge.New(1).IntPtr().Value(), is.NilOrNonZero))
-	assert.NoError(v.Validate(&struct{Name string}{Name: "aaa"}, is.NilOrNonZero))
+	assert.NoError(v.Validate(&struct{ Name string }{Name: "aaa"}, is.NilOrNonZero))
 }
 
 func TestAny(t *testing.T) {

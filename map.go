@@ -18,7 +18,7 @@ type (
 		rules []Rule
 	}
 	keyRule struct {
-		key interface{}
+		key   interface{}
 		rules []Rule
 	}
 )
@@ -105,7 +105,7 @@ func EachValues(rules ...Rule) Rule {
 	return &eachValueRule{rules: rules}
 }
 
-func (rule *eachValueRule) Validate(validator *Validator, value interface{}){
+func (rule *eachValueRule) Validate(validator *Validator, value interface{}) {
 	val := reflect.ValueOf(value)
 	for val.Kind() == reflect.Ptr {
 		val = val.Elem()

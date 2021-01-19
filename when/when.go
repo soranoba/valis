@@ -7,7 +7,7 @@ import (
 
 // HasKey returns a new rule that verifies the value meets the rules when the value has the key.
 func HasKey(key interface{}, rules ...valis.Rule) valis.Rule {
-	cond := func (value interface{}) bool {
+	cond := func(value interface{}) bool {
 		val := reflect.ValueOf(value)
 		for val.Kind() == reflect.Ptr {
 			val = val.Elem()

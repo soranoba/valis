@@ -12,7 +12,7 @@ type (
 	LocationKind int
 	// Location is the interface of the private struct that indicates the location of the value.
 	// Should not define your own Location struct.
-	Location     interface {
+	Location interface {
 		// Kind returns a LocationKind of the Location.
 		Kind() LocationKind
 		// Parent returns a parent location, when it is not LocationKindRoot. Otherwise, it returns nil.
@@ -72,7 +72,7 @@ var (
 	// DefaultLocationNameResolver is a LocationNamResolver used by default
 	DefaultLocationNameResolver LocationNameResolver = &defaultLocationNameResolver{}
 	// JSONLocationNameResolver is a LocationNameResolver that creates LocationNames using the json tag
-	JSONLocationNameResolver    LocationNameResolver = &jsonLocationNameResolver{}
+	JSONLocationNameResolver LocationNameResolver = &jsonLocationNameResolver{}
 	// RequestLocationNameResolver is a LocationNameResolver that creates LocationNames using the json and query tag
 	RequestLocationNameResolver LocationNameResolver = &requestLocationNameResolver{}
 )
@@ -142,8 +142,8 @@ func (loc *location) MapKeyLocation(key interface{}) Location {
 func (loc *location) MapValueLocation(key interface{}) Location {
 	return &location{
 		parent: loc,
-		kind: LocationKindMapValue,
-		value: key,
+		kind:   LocationKindMapValue,
+		value:  key,
 	}
 }
 

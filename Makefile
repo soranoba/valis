@@ -4,6 +4,7 @@ build:
 
 test:
 	go test ./... -count=1
+	cd to; go test ./... -count=1
 	cd tests; go test ./... -count=1
 
 format:

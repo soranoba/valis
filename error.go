@@ -31,7 +31,7 @@ type (
 	}
 
 	LocationAndErrorDetail struct {
-		Location Location
+		Location    Location
 		ErrorDetail *ErrorDetail
 	}
 
@@ -47,9 +47,8 @@ type (
 type (
 	standardErrorCollector struct {
 		nameResolver LocationNameResolver
-		details     []LocationAndErrorDetail
+		details      []LocationAndErrorDetail
 	}
-
 )
 
 // NewValidationError returns a new ValidationError.

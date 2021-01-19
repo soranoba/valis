@@ -21,8 +21,8 @@ func TestRequired(t *testing.T) {
 
 	type User struct {
 		FirstName string `required:"true"`
-		LastName string `required:"false"`
-		Age int `required:"True"`
+		LastName  string `required:"false"`
+		Age       int    `required:"True"`
 	}
 
 	assert.EqualError(

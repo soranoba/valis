@@ -51,7 +51,7 @@ func (e *hengeError) Unwrap() error {
 
 func NewCombinationRule(convertFunc valis.ConvertFunc) valis.CombinationRule {
 	return func(rules ...valis.Rule) valis.Rule {
-		return valis.To(convertFunc, rules...)		
+		return valis.To(convertFunc, rules...)
 	}
 }
 

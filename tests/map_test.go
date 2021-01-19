@@ -14,7 +14,7 @@ func TestKey(t *testing.T) {
 
 	assert.EqualError(
 		v.Validate(
-			map[string]string{"a":"A","b":"B"},
+			map[string]string{"a": "A", "b": "B"},
 			valis.Key("a", is.In("B")),
 			valis.Key("b", is.In("A")),
 		),
@@ -22,14 +22,14 @@ func TestKey(t *testing.T) {
 	)
 	assert.NoError(
 		v.Validate(
-			map[string]string{"a":"A","b":"B"},
+			map[string]string{"a": "A", "b": "B"},
 			valis.Key("a", is.In("A")),
 			valis.Key("b", is.In("B")),
 		),
 	)
 	assert.NoError(
 		v.Validate(
-			&map[string]string{"a":"A","b":"B"},
+			&map[string]string{"a": "A", "b": "B"},
 			valis.Key("a", is.In("A")),
 			valis.Key("b", is.In("B")),
 		),
@@ -71,14 +71,14 @@ func TestEachKeys(t *testing.T) {
 	assert := assert.New(t)
 
 	assert.NoError(
-		v.Validate(map[string]string{"a":"A","b":"B"}, valis.EachKeys(is.Required)),
+		v.Validate(map[string]string{"a": "A", "b": "B"}, valis.EachKeys(is.Required)),
 	)
 	assert.EqualError(
-		v.Validate(map[string]string{"":"A","b":"B"}, valis.EachKeys(is.Required)),
+		v.Validate(map[string]string{"": "A", "b": "B"}, valis.EachKeys(is.Required)),
 		"(required) [key: ] cannot be blank, but got \"\"",
 	)
 	assert.NoError(
-		v.Validate(&map[string]string{"a":"A","b":"B"}, valis.EachKeys(is.Required)),
+		v.Validate(&map[string]string{"a": "A", "b": "B"}, valis.EachKeys(is.Required)),
 	)
 
 	// NOTE: it returns an error when the value is not map
@@ -87,10 +87,10 @@ func TestEachKeys(t *testing.T) {
 	// NOTE: CommonRules automatically check, but values is not validated.
 	v := valis.NewValidator()
 	v.SetCommonRules()
-	assert.NoError(v.Validate(map[string]string{"":""}, valis.EachKeys(is.Any)))
+	assert.NoError(v.Validate(map[string]string{"": ""}, valis.EachKeys(is.Any)))
 	v.SetCommonRules(is.Required)
 	assert.EqualError(
-		v.Validate(map[string]string{"":"a","b":""}, valis.EachKeys(is.Any)),
+		v.Validate(map[string]string{"": "a", "b": ""}, valis.EachKeys(is.Any)),
 		"(required) [key: ] cannot be blank, but got \"\"",
 	)
 }
@@ -99,14 +99,14 @@ func TestEachValues(t *testing.T) {
 	assert := assert.New(t)
 
 	assert.NoError(
-		v.Validate(map[string]string{"a":"A","b":"B"}, valis.EachValues(is.Required)),
+		v.Validate(map[string]string{"a": "A", "b": "B"}, valis.EachValues(is.Required)),
 	)
 	assert.EqualError(
-		v.Validate(map[string]string{"a":"A","b":""}, valis.EachValues(is.Required)),
+		v.Validate(map[string]string{"a": "A", "b": ""}, valis.EachValues(is.Required)),
 		"(required) [b] cannot be blank, but got \"\"",
 	)
 	assert.NoError(
-		v.Validate(&map[string]string{"a":"A","b":"B"}, valis.EachValues(is.Required)),
+		v.Validate(&map[string]string{"a": "A", "b": "B"}, valis.EachValues(is.Required)),
 	)
 
 	// NOTE: it returns an error when the value is not map
@@ -115,10 +115,10 @@ func TestEachValues(t *testing.T) {
 	// NOTE: CommonRules automatically check, but values is not validated.
 	v := valis.NewValidator()
 	v.SetCommonRules()
-	assert.NoError(v.Validate(map[string]string{"":""}, valis.EachValues(is.Any)))
+	assert.NoError(v.Validate(map[string]string{"": ""}, valis.EachValues(is.Any)))
 	v.SetCommonRules(is.Required)
 	assert.EqualError(
-		v.Validate(map[string]string{"":"a","b":""}, valis.EachValues(is.Any)),
+		v.Validate(map[string]string{"": "a", "b": ""}, valis.EachValues(is.Any)),
 		"(required) [b] cannot be blank, but got \"\"",
 	)
 }

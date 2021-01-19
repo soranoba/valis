@@ -11,7 +11,7 @@ func TestField(t *testing.T) {
 	assert := assert.New(t)
 	type User struct {
 		Name string
-		Age int
+		Age  int
 	}
 
 	user := User{}

@@ -8,20 +8,20 @@ import (
 )
 
 type (
-	requiredRule  struct{}
-	zeroRule struct{}
+	requiredRule     struct{}
+	zeroRule         struct{}
 	nilOrNonZeroRule struct{}
-	anyRule       struct{}
-	inclusionRule struct {
+	anyRule          struct{}
+	inclusionRule    struct {
 		values []interface{}
 	}
 )
 
 const (
-	RequiredCode  = "required"
-	ZeroCode = "zero"
+	RequiredCode     = "required"
+	ZeroCode         = "zero"
 	NilOrNonZeroCode = "nil_or_non_zero"
-	InclusionCode = "inclusion"
+	InclusionCode    = "inclusion"
 )
 
 var (

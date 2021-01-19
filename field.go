@@ -9,7 +9,7 @@ import (
 type (
 	fieldRule struct {
 		fieldPtr interface{}
-		rules      []Rule
+		rules    []Rule
 	}
 )
 
