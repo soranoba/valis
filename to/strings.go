@@ -2,9 +2,10 @@ package to
 
 import (
 	"errors"
-	"github.com/soranoba/valis"
 	"reflect"
 	"strings"
+
+	"github.com/soranoba/valis"
 )
 
 func Split(sep string, rules ...valis.Rule) valis.Rule {

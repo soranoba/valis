@@ -19,14 +19,14 @@ type (
 		Parent() Location
 
 		// Field returns a reflect.StructField when it is LocationKindField. Otherwise, it panic.
-		Field() reflect.StructField
+		Field() *reflect.StructField
 		// Index returns a Index when it is LocationKindIndex. Otherwise, it panic.
 		Index() int
 		// Key returns a Key when it is LocationKindMapKey or LocationKindMapValue. Otherwise, it panic.
 		Key() interface{}
 
 		// FieldLocation returns a new Location.
-		FieldLocation(field reflect.StructField) Location
+		FieldLocation(field *reflect.StructField) Location
 		// IndexLocation returns a new Location.
 		IndexLocation(index int) Location
 		// MapKeyLocation returns a new Location.
@@ -92,11 +92,11 @@ func (loc *location) Parent() Location {
 	return loc.parent
 }
 
-func (loc *location) Field() reflect.StructField {
+func (loc *location) Field() *reflect.StructField {
 	if loc.kind != LocationKindField {
 		panic("Kind must be LocationKindField")
 	}
-	return loc.value.(reflect.StructField)
+	return loc.value.(*reflect.StructField)
 }
 
 func (loc *location) Index() int {
@@ -115,7 +115,7 @@ func (loc *location) Key() interface{} {
 	}
 }
 
-func (loc *location) FieldLocation(field reflect.StructField) Location {
+func (loc *location) FieldLocation(field *reflect.StructField) Location {
 	return &location{
 		parent: loc,
 		kind:   LocationKindField,

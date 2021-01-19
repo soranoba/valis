@@ -56,13 +56,9 @@ func (v *Validator) SetErrorCollectorFactoryFunc(f ErrorCollectorFactoryFunc) {
 func (v *Validator) Clone(opts *CloneOpts) *Validator {
 	newValidator := *v
 	if opts.InheritErrorCollector {
-		newValidator.errorCollector = v.ErrorCollector()
+		newValidator.errorCollector = v.errorCollector
 	} else {
-		if opts.ErrorCollector != nil {
-			newValidator.errorCollector = opts.ErrorCollector
-		} else {
-			newValidator.errorCollector = nil
-		}
+		newValidator.errorCollector = opts.ErrorCollector
 	}
 	if !opts.InheritLocation {
 		if opts.Location != nil {
@@ -79,19 +75,32 @@ func (v *Validator) Location() Location {
 	return v.loc
 }
 
-// WithField is equiv to v.Clone(&CloneOpts{InheritErrorCollector: true, Location: v.Location().FieldLocation(field)})
-func (v *Validator) WithField(field reflect.StructField) *Validator {
-	return v.Clone(&CloneOpts{InheritErrorCollector: true, Location: v.Location().FieldLocation(field)})
+func (v *Validator) DiveField(field *reflect.StructField, f func(v *Validator)) {
+	loc := v.loc
+	v.loc = loc.FieldLocation(field)
+	f(v)
+	v.loc = loc
 }
 
-// WithIndex is equiv to v.Clone(&CloneOpts{InheritErrorCollector: true, Location: v.Location().IndexLocation(index)})
-func (v *Validator) WithIndex(index int) *Validator {
-	return v.Clone(&CloneOpts{InheritErrorCollector: true, Location: v.Location().IndexLocation(index)})
+func (v *Validator) DiveIndex(index int, f func(v *Validator)) {
+	loc := v.loc
+	v.loc = loc.IndexLocation(index)
+	f(v)
+	v.loc = loc
 }
 
-// WithKey is equiv to v.Clone(&CloneOpts{InheritErrorCollector: true, Location: v.Location().MapValueLocation(key)})
-func (v *Validator) WithMapKey(key interface{}) *Validator {
-	return v.Clone(&CloneOpts{InheritErrorCollector: true, Location: v.Location().MapValueLocation(key)})
+func (v *Validator) DiveMapKey(key interface{}, f func(v *Validator)) {
+	loc := v.loc
+	v.loc = loc.MapKeyLocation(key)
+	f(v)
+	v.loc = loc
+}
+
+func (v *Validator) DiveMapValue(key interface{}, f func(v *Validator)) {
+	loc := v.loc
+	v.loc = loc.MapValueLocation(key)
+	f(v)
+	v.loc = loc
 }
 
 // ErrorCollector returns an ErrorCollector.

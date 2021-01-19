@@ -18,7 +18,7 @@ func TestKey(t *testing.T) {
 			valis.Key("a", is.In("B")),
 			valis.Key("b", is.In("A")),
 		),
-		"(inclusion) [a] is not included in [B], but got \"A\". (inclusion) [b] is not included in [A], but got \"B\"",
+		"(inclusion) [key: a] is not included in [B], but got \"A\". (inclusion) [key: b] is not included in [A], but got \"B\"",
 	)
 	assert.NoError(
 		v.Validate(

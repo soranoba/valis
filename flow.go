@@ -36,9 +36,15 @@ func And(rules ...Rule) Rule {
 }
 
 func (r *andRule) Validate(validator *Validator, value interface{}) {
-	rules := append(validator.commonRules, r.rules...)
-	for _, rule := range rules {
-		rule.Validate(validator, value)
+	if len(validator.commonRules) > 0 {
+		rules := append(validator.commonRules, r.rules...)
+		for _, rule := range rules {
+			rule.Validate(validator, value)
+		}
+	} else {
+		for _, rule := range r.rules {
+			rule.Validate(validator, value)
+		}
 	}
 }
 
@@ -89,8 +95,10 @@ func (rule *eachRule) Validate(validator *Validator, value interface{}) {
 	switch val.Kind() {
 	case reflect.Slice, reflect.Array:
 		for i := 0; i < val.Len(); i++ {
-			v := val.Index(i)
-			And(rule.rules...).Validate(validator.WithIndex(i), v.Interface())
+			indexValue := val.Index(i).Interface()
+			validator.DiveIndex(i, func(v *Validator) {
+				And(rule.rules...).Validate(v, indexValue)
+			})
 		}
 	default:
 		validator.ErrorCollector().Add(validator.Location(), &ErrorDetail{

@@ -1,11 +1,13 @@
 package is_test
 
 import (
+	"math"
+	"testing"
+
 	"github.com/soranoba/henge"
 	"github.com/soranoba/valis"
 	"github.com/soranoba/valis/is"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 var (
@@ -30,7 +32,7 @@ func TestRequired(t *testing.T) {
 	assert.NoError(v.Validate("a", is.Required))
 	assert.NoError(v.Validate(1, is.Required))
 	assert.NoError(v.Validate(struct{ Name string }{Name: "name"}, is.Required))
-	assert.NoError(v.Validate([...]string{"aaaa"}, is.Required))
+	assert.NoError(v.Validate([...]string{"abc"}, is.Required))
 }
 
 func TestZero(t *testing.T) {
@@ -98,4 +100,26 @@ func TestIn(t *testing.T) {
 	assert.NoError(v.Validate(&i, is.In(&x, &y, &z)))
 	i = 5
 	assert.Error(v.Validate(&i, is.In(&x, &y, &z)))
+}
+
+func TestLengthRange(t *testing.T) {
+	assert := assert.New(t)
+
+	assert.EqualError(
+		v.Validate("abc", is.LengthRange(4, math.MaxInt64)),
+		"(too_short_length) is too short length (min: 4), but got \"abc\"",
+	)
+	assert.EqualError(
+		v.Validate("abc", is.LengthRange(0, 2)),
+		"(too_long_length) is too long length (max: 2), but got \"abc\"",
+	)
+	assert.EqualError(
+		v.Validate("abc", is.LengthRange(4, 3)),
+		"(too_short_length) is too short length (min: 4), but got \"abc\"",
+	)
+	assert.EqualError(
+		v.Validate(0, is.LengthRange(0, 10)),
+		"(invalid_type) must be string, but got 0",
+	)
+	assert.NoError(v.Validate("abc", is.LengthRange(0, 10)))
 }

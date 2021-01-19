@@ -2,8 +2,9 @@ package valis
 
 import (
 	"errors"
-	valishelpers "github.com/soranoba/valis/helpers"
 	"reflect"
+
+	valishelpers "github.com/soranoba/valis/helpers"
 )
 
 type (
@@ -40,5 +41,7 @@ func (r *fieldRule) Validate(validator *Validator, value interface{}) {
 	}
 
 	field := valishelpers.GetField(value, r.fieldPtr)
-	And(r.rules...).Validate(validator.WithField(field), reflect.ValueOf(r.fieldPtr).Elem().Interface())
+	validator.DiveField(field, func(v *Validator) {
+		And(r.rules...).Validate(v, reflect.ValueOf(r.fieldPtr).Elem().Interface())
+	})
 }

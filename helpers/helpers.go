@@ -1,9 +1,11 @@
 package valishelpers
 
-import "reflect"
+import (
+	"reflect"
+)
 
 // GetField returns the reflect.StructField of the field. When it is not found, it panics.
-func GetField(structPointer interface{}, fieldPointer interface{}) reflect.StructField {
+func GetField(structPointer interface{}, fieldPointer interface{}) *reflect.StructField {
 	structVal := reflect.ValueOf(structPointer)
 	fieldVal := reflect.ValueOf(fieldPointer)
 
@@ -24,7 +26,8 @@ func GetField(structPointer interface{}, fieldPointer interface{}) reflect.Struc
 	for i := 0; i < structVal.NumField(); i++ {
 		field := structVal.Field(i).Addr()
 		if field == fieldVal {
-			return structVal.Type().Field(i)
+			strField := structVal.Type().Field(i)
+			return &strField
 		}
 	}
 	panic("invalid fieldPointer")

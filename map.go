@@ -61,7 +61,9 @@ func (rule *keyRule) Validate(validator *Validator, value interface{}) {
 
 	mapValue := val.MapIndex(keyVal)
 	if mapValue.IsValid() && mapValue.CanInterface() {
-		And(rule.rules...).Validate(validator.WithMapKey(rule.key), mapValue.Interface())
+		validator.DiveMapKey(rule.key, func(v *Validator) {
+			And(rule.rules...).Validate(v, mapValue.Interface())
+		})
 	} else {
 		validator.ErrorCollector().Add(validator.Location(), &ErrorDetail{
 			KeyNotFoundCode,
@@ -95,9 +97,10 @@ func (rule *eachKeyRule) Validate(validator *Validator, value interface{}) {
 	}
 
 	for _, keyVal := range val.MapKeys() {
-		loc := validator.Location().MapKeyLocation(keyVal.Interface())
-		newValidator := validator.Clone(&CloneOpts{Location: loc, InheritErrorCollector: true})
-		And(rule.rules...).Validate(newValidator, keyVal.Interface())
+		k := keyVal.Interface()
+		validator.DiveMapKey(k, func(v *Validator) {
+			And(rule.rules...).Validate(v, k)
+		})
 	}
 }
 
@@ -124,6 +127,8 @@ func (rule *eachValueRule) Validate(validator *Validator, value interface{}) {
 
 	iter := val.MapRange()
 	for iter.Next() {
-		And(rule.rules...).Validate(validator.WithMapKey(iter.Key().Interface()), iter.Value().Interface())
+		validator.DiveMapValue(iter.Key().Interface(), func(v *Validator) {
+			And(rule.rules...).Validate(v, iter.Value().Interface())
+		})
 	}
 }

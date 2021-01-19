@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/soranoba/valis"
 	"reflect"
+	"unicode/utf8"
 )
 
 type (
@@ -15,6 +16,10 @@ type (
 	inclusionRule    struct {
 		values []interface{}
 	}
+	lengthRule struct {
+		min int
+		max int
+	}
 )
 
 const (
@@ -22,6 +27,8 @@ const (
 	ZeroCode         = "zero"
 	NilOrNonZeroCode = "nil_or_non_zero"
 	InclusionCode    = "inclusion"
+	TooShortLength   = "too_short_length"
+	TooLongLength    = "too_long_length"
 )
 
 var (
@@ -36,6 +43,10 @@ var (
 	Any valis.Rule = &anyRule{}
 )
 
+var (
+	ErrCannotBeBlank = errors.New("cannot be blank")
+)
+
 func (rule *requiredRule) Validate(validator *valis.Validator, value interface{}) {
 	val := reflect.ValueOf(value)
 	if !val.IsValid() || val.IsZero() {
@@ -44,7 +55,7 @@ func (rule *requiredRule) Validate(validator *valis.Validator, value interface{}
 			rule,
 			value,
 			nil,
-			errors.New("cannot be blank"),
+			ErrCannotBeBlank,
 		})
 	}
 }
@@ -129,4 +140,53 @@ func (rule *inclusionRule) Validate(validator *valis.Validator, value interface{
 		nil,
 		fmt.Errorf("is not included in %v", rule.values),
 	})
+}
+
+func LengthRange(min int, max int) valis.Rule {
+	return &lengthRule{min: min, max: max}
+}
+
+func (rule *lengthRule) Validate(validator *valis.Validator, value interface{}) {
+	val := reflect.ValueOf(value)
+	for val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
+	var length int
+
+	switch val.Kind() {
+	case reflect.String:
+		str := val.Interface().(string)
+		length = utf8.RuneCountInString(str)
+	case reflect.Slice, reflect.Array, reflect.Map:
+		length = val.Len()
+	default:
+		validator.ErrorCollector().Add(validator.Location(), &valis.ErrorDetail{
+			valis.InvalidTypeCode,
+			rule,
+			value,
+			nil,
+			fmt.Errorf("must be string"),
+		})
+		return
+	}
+
+	if length < rule.min {
+		validator.ErrorCollector().Add(validator.Location(), &valis.ErrorDetail{
+			TooShortLength,
+			rule,
+			value,
+			nil,
+			fmt.Errorf("is too short length (min: %d)", rule.min),
+		})
+	}
+	if length > rule.max {
+		validator.ErrorCollector().Add(validator.Location(), &valis.ErrorDetail{
+			TooLongLength,
+			rule,
+			value,
+			nil,
+			fmt.Errorf("is too long length (max: %d)", rule.max),
+		})
+	}
 }

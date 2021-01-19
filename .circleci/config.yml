@@ -23,6 +23,11 @@ jobs:
     steps:
       - checkout
       - run: make test
+  bench:
+    <<: *default
+    steps:
+      - checkout
+      - run: make bench
 
 workflows:
   version: 2
@@ -33,4 +38,6 @@ workflows:
       - lint:
           context: org-global
       - test:
+          context: org-global
+      - bench:
           context: org-global
