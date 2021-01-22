@@ -1,7 +1,7 @@
 package valis
 
 import (
-	"errors"
+	"github.com/soranoba/valis/code"
 	"reflect"
 
 	valishelpers "github.com/soranoba/valis/helpers"
@@ -30,13 +30,7 @@ func (r *fieldRule) Validate(validator *Validator, value interface{}) {
 	}
 
 	if val.Kind() != reflect.Struct {
-		validator.ErrorCollector().Add(validator.Location(), &ErrorDetail{
-			InvalidTypeCode,
-			r,
-			value,
-			nil,
-			errors.New("must be a struct"),
-		})
+		validator.ErrorCollector().Add(validator.Location(), NewError(code.StructOnly, value))
 		return
 	}
 

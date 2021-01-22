@@ -1,6 +1,7 @@
 package valis
 
 import (
+	"fmt"
 	"reflect"
 	"sync"
 )
@@ -16,10 +17,6 @@ type (
 		lock     *sync.RWMutex
 		cache    map[reflect.StructTag][]Rule
 	}
-)
-
-const (
-	InvalidStructTagCode = "invalid_struct_tag"
 )
 
 // NewTagRule returns a new rule, that call ruleFunc when it found any fields that have the tag.
@@ -54,14 +51,7 @@ func (r *tagRule) Validate(validator *Validator, value interface{}) {
 				var err error
 				rules, err = r.ruleFunc(tag)
 				if err != nil {
-					validator.ErrorCollector().Add(validator.Location(), &ErrorDetail{
-						InvalidStructTagCode,
-						r,
-						value,
-						nil,
-						err,
-					})
-					continue
+					panic(fmt.Sprintf("%s (key = %s, path = %s)", err.Error(), r.key, field.PkgPath))
 				}
 
 				r.lock.Lock()

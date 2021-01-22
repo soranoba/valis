@@ -3,7 +3,9 @@ package valistag
 import (
 	"github.com/soranoba/valis"
 	"github.com/soranoba/valis/is"
+	"github.com/soranoba/valis/when"
 	"math"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -13,7 +15,7 @@ var (
 	//   - `required:"${flag}"`: When flag is true, the value must be not empty.
 	Required = valis.NewTagRule("required", requiredRules)
 	//   - `required`: equiv to is.Required
-	//   - `max=${max}`: equiv to
+	//   - `max=${max}`: equiv to is.LengthBetween(0, max) when string, otherwise equiv to is.LenBetween(0, max)
 	//   - `min=${min}`:
 	Validate = valis.NewTagRule("validate", validateRules)
 )
@@ -28,14 +30,22 @@ var (
 			if _, err := SplitAndParseTagValues(v, "=", &min); err != nil {
 				return nil, err
 			}
-			return []valis.Rule{is.LengthRange(min, math.MaxInt64)}, nil
+			return []valis.Rule{
+				when.IsTypeOrElem(reflect.TypeOf((*string)(nil)),
+					is.LengthBetween(min, math.MaxInt64),
+				).Else(is.LenBetween(min, math.MaxInt64)),
+			}, nil
 		},
 		"max": func(v string) ([]valis.Rule, error) { // max=${max}
 			var max int
 			if _, err := SplitAndParseTagValues(v, "=", &max); err != nil {
 				return nil, err
 			}
-			return []valis.Rule{is.LengthRange(0, max)}, nil
+			return []valis.Rule{
+				when.IsTypeOrElem(reflect.TypeOf((*string)(nil)),
+					is.LengthBetween(0, max),
+				).Else(is.LenBetween(0, max)),
+			}, nil
 		},
 	}
 )

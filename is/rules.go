@@ -2,8 +2,8 @@ package is
 
 import (
 	"errors"
-	"fmt"
 	"github.com/soranoba/valis"
+	"github.com/soranoba/valis/code"
 	"reflect"
 	"unicode/utf8"
 )
@@ -20,15 +20,10 @@ type (
 		min int
 		max int
 	}
-)
-
-const (
-	RequiredCode     = "required"
-	ZeroCode         = "zero"
-	NilOrNonZeroCode = "nil_or_non_zero"
-	InclusionCode    = "inclusion"
-	TooShortLength   = "too_short_length"
-	TooLongLength    = "too_long_length"
+	lenRule struct {
+		min int
+		max int
+	}
 )
 
 var (
@@ -50,26 +45,14 @@ var (
 func (rule *requiredRule) Validate(validator *valis.Validator, value interface{}) {
 	val := reflect.ValueOf(value)
 	if !val.IsValid() || val.IsZero() {
-		validator.ErrorCollector().Add(validator.Location(), &valis.ErrorDetail{
-			RequiredCode,
-			rule,
-			value,
-			nil,
-			ErrCannotBeBlank,
-		})
+		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.Required, value))
 	}
 }
 
 func (rule *zeroRule) Validate(validator *valis.Validator, value interface{}) {
 	val := reflect.ValueOf(value)
 	if val.IsValid() && !val.IsZero() {
-		validator.ErrorCollector().Add(validator.Location(), &valis.ErrorDetail{
-			ZeroCode,
-			rule,
-			value,
-			nil,
-			errors.New("must be nil or zero"),
-		})
+		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.ZeroOnly, value))
 	}
 }
 
@@ -89,13 +72,7 @@ func (rule *nilOrNonZeroRule) Validate(validator *valis.Validator, value interfa
 	}
 
 	if !isValid {
-		validator.ErrorCollector().Add(validator.Location(), &valis.ErrorDetail{
-			NilOrNonZeroCode,
-			rule,
-			value,
-			nil,
-			errors.New("must be nil or non-zero"),
-		})
+		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.NilOrNonZero, value))
 	}
 }
 
@@ -133,16 +110,10 @@ func (rule *inclusionRule) Validate(validator *valis.Validator, value interface{
 			}
 		}
 	}
-	validator.ErrorCollector().Add(validator.Location(), &valis.ErrorDetail{
-		InclusionCode,
-		rule,
-		value,
-		nil,
-		fmt.Errorf("is not included in %v", rule.values),
-	})
+	validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.Inclusion, value, rule.values))
 }
 
-func LengthRange(min int, max int) valis.Rule {
+func LengthBetween(min int, max int) valis.Rule {
 	return &lengthRule{min: min, max: max}
 }
 
@@ -158,35 +129,43 @@ func (rule *lengthRule) Validate(validator *valis.Validator, value interface{}) 
 	case reflect.String:
 		str := val.Interface().(string)
 		length = utf8.RuneCountInString(str)
-	case reflect.Slice, reflect.Array, reflect.Map:
-		length = val.Len()
 	default:
-		validator.ErrorCollector().Add(validator.Location(), &valis.ErrorDetail{
-			valis.InvalidTypeCode,
-			rule,
-			value,
-			nil,
-			fmt.Errorf("must be string"),
-		})
+		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.StringOnly, value))
 		return
 	}
 
 	if length < rule.min {
-		validator.ErrorCollector().Add(validator.Location(), &valis.ErrorDetail{
-			TooShortLength,
-			rule,
-			value,
-			nil,
-			fmt.Errorf("is too short length (min: %d)", rule.min),
-		})
+		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.TooShortLength, value, rule.min))
 	}
 	if length > rule.max {
-		validator.ErrorCollector().Add(validator.Location(), &valis.ErrorDetail{
-			TooLongLength,
-			rule,
-			value,
-			nil,
-			fmt.Errorf("is too long length (max: %d)", rule.max),
-		})
+		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.TooLongLength, value, rule.max))
+	}
+}
+
+func LenBetween(min int, max int) valis.Rule {
+	return &lenRule{min: min, max: max}
+}
+
+func (rule *lenRule) Validate(validator *valis.Validator, value interface{}) {
+	val := reflect.ValueOf(value)
+	for val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
+	var length int
+
+	switch val.Kind() {
+	case reflect.String, reflect.Map, reflect.Slice, reflect.Array:
+		length = val.Len()
+	default:
+		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.NotIterable, value))
+		return
+	}
+
+	if length < rule.min {
+		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.TooShortLen, value, rule.min))
+	}
+	if length > rule.max {
+		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.TooLongLen, value, rule.max))
 	}
 }

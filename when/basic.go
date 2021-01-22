@@ -37,7 +37,7 @@ func IsTypeOrPtr(ty reflect.Type, rules ...valis.Rule) valis.Rule {
 }
 
 // IsTypeOrPtr returns a new rule that verifies the value meets the rules when the type of the value is ty or elem of ty.
-func IsTypeOrElem(ty reflect.Type, rules ...valis.Rule) valis.Rule {
+func IsTypeOrElem(ty reflect.Type, rules ...valis.Rule) valis.WhenRule {
 	if ty == nil {
 		panic("invalid ty")
 	}

@@ -1,14 +1,17 @@
 package valis
 
 import (
+	"github.com/soranoba/valis/code"
 	"reflect"
 )
 
 type (
 	// Rule is an interface where verification contents are defined.
+	// Needs to define it in Public member variables so that you can refer to the value of the parameter using text/template package.
 	Rule interface {
 		Validate(validator *Validator, value interface{})
 	}
+	WhenRule = *whenRule
 	// CombinationRule is a high-order function that returns a new Rule.
 	CombinationRule func(rules ...Rule) Rule
 
@@ -25,10 +28,6 @@ type (
 type (
 	validatableRule struct {
 	}
-)
-
-const (
-	ValidatableCode = "validatable"
 )
 
 var (
@@ -54,13 +53,7 @@ func (rule *validatableRule) Validate(validator *Validator, value interface{}) {
 			}
 			if v, ok := val.Interface().(Validatable); ok {
 				if err := v.Validate(); err != nil {
-					validator.ErrorCollector().Add(validator.Location(), &ErrorDetail{
-						ValidatableCode,
-						rule,
-						value,
-						nil,
-						err,
-					})
+					validator.ErrorCollector().Add(validator.Location(), NewError(code.Custom, value, err))
 				}
 				return
 			}

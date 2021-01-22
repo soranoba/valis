@@ -22,12 +22,13 @@ func init() {
 func TestRequired(t *testing.T) {
 	assert := assert.New(t)
 
-	assert.EqualError(v.Validate("", is.Required), "(required) cannot be blank, but got \"\"")
-	assert.EqualError(v.Validate(0, is.Required), "(required) cannot be blank, but got 0")
-	assert.EqualError(v.Validate(struct{}{}, is.Required), "(required) cannot be blank, but got struct {}{}")
-	assert.EqualError(v.Validate(nil, is.Required), "(required) cannot be blank, but got <nil>")
-	assert.EqualError(v.Validate([...]string{}, is.Required), "(required) cannot be blank, but got [0]string{}")
-	assert.EqualError(v.Validate([...]string{""}, is.Required), "(required) cannot be blank, but got [1]string{\"\"}")
+	errString := "(required) is required"
+	assert.EqualError(v.Validate("", is.Required), errString)
+	assert.EqualError(v.Validate(0, is.Required), errString)
+	assert.EqualError(v.Validate(struct{}{}, is.Required), errString)
+	assert.EqualError(v.Validate(nil, is.Required), errString)
+	assert.EqualError(v.Validate([...]string{}, is.Required), errString)
+	assert.EqualError(v.Validate([...]string{""}, is.Required), errString)
 
 	assert.NoError(v.Validate("a", is.Required))
 	assert.NoError(v.Validate(1, is.Required))
@@ -38,13 +39,11 @@ func TestRequired(t *testing.T) {
 func TestZero(t *testing.T) {
 	assert := assert.New(t)
 
-	assert.EqualError(v.Validate("a", is.Zero), "(zero) must be nil or zero, but got \"a\"")
-	assert.EqualError(v.Validate(1, is.Zero), "(zero) must be nil or zero, but got 1")
-	assert.EqualError(v.Validate([...]string{"a"}, is.Zero), "(zero) must be nil or zero, but got [1]string{\"a\"}")
-	assert.EqualError(
-		v.Validate(struct{ Name string }{Name: "aaa"}, is.Zero),
-		"(zero) must be nil or zero, but got struct { Name string }{Name:\"aaa\"}",
-	)
+	errString := "(zero_only) must be blank"
+	assert.EqualError(v.Validate("a", is.Zero), errString)
+	assert.EqualError(v.Validate(1, is.Zero), errString)
+	assert.EqualError(v.Validate([...]string{"a"}, is.Zero), errString)
+	assert.EqualError(v.Validate(struct{ Name string }{Name: "aaa"}, is.Zero), errString)
 
 	assert.NoError(v.Validate("", is.Zero))
 	assert.NoError(v.Validate(nil, is.Zero))
@@ -55,10 +54,11 @@ func TestZero(t *testing.T) {
 func TestNilOrNonZero(t *testing.T) {
 	assert := assert.New(t)
 
-	assert.EqualError(v.Validate("", is.NilOrNonZero), "(nil_or_non_zero) must be nil or non-zero, but got \"\"")
-	assert.EqualError(v.Validate([...]string{""}, is.NilOrNonZero), "(nil_or_non_zero) must be nil or non-zero, but got [1]string{\"\"}")
-	assert.EqualError(v.Validate(&struct{}{}, is.NilOrNonZero), "(nil_or_non_zero) must be nil or non-zero, but got &struct {}{}")
-	assert.Error(v.Validate(henge.New(0).IntPtr().Value(), is.NilOrNonZero))
+	errString := "(nil_or_non_zero) can't be blank (or zero) if specified"
+	assert.EqualError(v.Validate("", is.NilOrNonZero), errString)
+	assert.EqualError(v.Validate([...]string{""}, is.NilOrNonZero), errString)
+	assert.EqualError(v.Validate(&struct{}{}, is.NilOrNonZero), errString)
+	assert.EqualError(v.Validate(henge.New(0).IntPtr().Value(), is.NilOrNonZero), errString)
 
 	assert.NoError(v.Validate(nil, is.NilOrNonZero))
 	assert.NoError(v.Validate(([]string)(nil), is.NilOrNonZero))
@@ -82,12 +82,12 @@ func TestIn(t *testing.T) {
 	assert := assert.New(t)
 
 	assert.NoError(v.Validate("b", is.In("a", "b", "c")))
-	assert.EqualError(v.Validate("d", is.In("a", "b", "c")), "(inclusion) is not included in [a b c], but got \"d\"")
+	assert.EqualError(v.Validate("d", is.In("a", "b", "c")), "(inclusion) is not included in [a b c]")
 	assert.NoError(v.Validate(2, is.In(1, 2, 3)))
-	assert.EqualError(v.Validate(5, is.In(1, 2, 3)), "(inclusion) is not included in [1 2 3], but got 5")
+	assert.EqualError(v.Validate(5, is.In(1, 2, 3)), "(inclusion) is not included in [1 2 3]")
 
 	// NOTE: Does not match if the types are different
-	assert.EqualError(v.Validate(int64(1), is.In(1, 2, 3)), "(inclusion) is not included in [1 2 3], but got 1")
+	assert.EqualError(v.Validate(int64(1), is.In(1, 2, 3)), "(inclusion) is not included in [1 2 3]")
 
 	// NOTE: For pointers, it compares Elem values
 	i := 2
@@ -106,20 +106,20 @@ func TestLengthRange(t *testing.T) {
 	assert := assert.New(t)
 
 	assert.EqualError(
-		v.Validate("abc", is.LengthRange(4, math.MaxInt64)),
-		"(too_short_length) is too short length (min: 4), but got \"abc\"",
+		v.Validate("abc", is.LengthBetween(4, math.MaxInt64)),
+		"(too_short_length) is too short length (minimum is 4 characters)",
 	)
 	assert.EqualError(
-		v.Validate("abc", is.LengthRange(0, 2)),
-		"(too_long_length) is too long length (max: 2), but got \"abc\"",
+		v.Validate("abc", is.LengthBetween(0, 2)),
+		"(too_long_length) is too long length (maximum is 2 characters)",
 	)
 	assert.EqualError(
-		v.Validate("abc", is.LengthRange(4, 3)),
-		"(too_short_length) is too short length (min: 4), but got \"abc\"",
+		v.Validate("abc", is.LengthBetween(4, 3)),
+		"(too_short_length) is too short length (minimum is 4 characters)",
 	)
 	assert.EqualError(
-		v.Validate(0, is.LengthRange(0, 10)),
-		"(invalid_type) must be string, but got 0",
+		v.Validate(0, is.LengthBetween(0, 10)),
+		"(string_only) must be a string",
 	)
-	assert.NoError(v.Validate("abc", is.LengthRange(0, 10)))
+	assert.NoError(v.Validate("abc", is.LengthBetween(0, 10)))
 }

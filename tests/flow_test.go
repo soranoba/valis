@@ -5,7 +5,6 @@ import (
 	"github.com/soranoba/valis"
 	"github.com/soranoba/valis/is"
 	"github.com/stretchr/testify/assert"
-	"strings"
 	"testing"
 )
 
@@ -16,7 +15,7 @@ func TestOr(t *testing.T) {
 	assert.NoError(v.Validate("aaa", valis.Or(is.Zero, is.In("aaa"))))
 	assert.EqualError(
 		v.Validate("abc", valis.Or(is.Zero, is.In("aaa"))),
-		"(or) cannot meet either rule, but got \"abc\"",
+		"(invalid) is invalid",
 	)
 }
 
@@ -27,7 +26,7 @@ func TestWhen(t *testing.T) {
 	Never := func(interface{}) bool { return false }
 	assert.EqualError(
 		v.Validate("", valis.When(Any, is.Required)),
-		"(required) cannot be blank, but got \"\"",
+		"(required) is required",
 	)
 	assert.NoError(v.Validate("", valis.When(Never, is.Required)))
 }
@@ -37,7 +36,7 @@ func TestEach(t *testing.T) {
 
 	assert.EqualError(
 		v.Validate([]string{"a", "", "b"}, valis.Each(is.Required)),
-		"(required) [1] cannot be blank, but got \"\"",
+		"(required) [1] is required",
 	)
 	assert.NoError(
 		v.Validate([]string{"a", "b", "c"}, valis.Each(is.Required)),
@@ -48,9 +47,10 @@ func TestEach(t *testing.T) {
 		henge.New("").StringPtr().Value(),
 		henge.New("b").StringPtr().Value(),
 	}
-	if err := v.Validate(value, valis.Each(is.NilOrNonZero)); assert.Error(err) {
-		assert.True(strings.HasPrefix(err.Error(), "(nil_or_non_zero) [1] must be nil or non-zero"), err.Error())
-	}
+	assert.EqualError(
+		v.Validate(value, valis.Each(is.NilOrNonZero)),
+		"(nil_or_non_zero) [1] can't be blank (or zero) if specified",
+	)
 	value = []*string{
 		henge.New("a").StringPtr().Value(),
 		henge.New("b").StringPtr().Value(),
@@ -61,12 +61,12 @@ func TestEach(t *testing.T) {
 	)
 
 	// NOTE: value must be array or slice.
-	assert.EqualError(v.Validate("", valis.Each(is.Required)), "(invalid_type) must be array or slice, but got \"\"")
+	assert.EqualError(v.Validate("", valis.Each(is.Required)), "(array_only) must be any array")
 
 	// NOTE: CommonRules automatically check.
 	v := valis.NewValidator()
 	v.SetCommonRules()
 	assert.NoError(v.Validate([]string{""}, valis.Each()))
 	v.SetCommonRules(is.Required)
-	assert.EqualError(v.Validate([]string{""}, valis.Each()), "(required) [0] cannot be blank, but got \"\"")
+	assert.EqualError(v.Validate([]string{""}, valis.Each()), "(required) [0] is required")
 }

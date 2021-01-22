@@ -1,7 +1,7 @@
 package valis
 
 import (
-	"errors"
+	"github.com/soranoba/valis/code"
 	"reflect"
 )
 
@@ -14,20 +14,17 @@ type (
 		rules []Rule
 	}
 	orRule struct {
-		rules []Rule
+		Rules []Rule
 	}
 	eachRule struct {
 		rules []Rule
 	}
 	whenRule struct {
-		cond  ConditionFunc
-		rules []Rule
+		cond          ConditionFunc
+		whenRules     []Rule
+		didCalledElse bool
+		elseRules     []Rule
 	}
-)
-
-const (
-	OrCode          = "or"
-	InvalidTypeCode = "invalid_type"
 )
 
 // And returns a new rule that verifies the value meets the rules and all common rules.
@@ -50,34 +47,37 @@ func (r *andRule) Validate(validator *Validator, value interface{}) {
 
 // Or returns a new rule that verifies the value meets the rules at least one.
 func Or(rules ...Rule) Rule {
-	return &orRule{rules: rules}
+	return &orRule{Rules: rules}
 }
 
 func (r *orRule) Validate(validator *Validator, value interface{}) {
-	for _, rule := range r.rules {
+	for _, rule := range r.Rules {
 		newValidator := validator.Clone(&CloneOpts{InheritLocation: true})
 		rule.Validate(newValidator, value)
 		if !newValidator.ErrorCollector().HasError() {
 			return
 		}
 	}
-	validator.ErrorCollector().Add(validator.Location(), &ErrorDetail{
-		OrCode,
-		r,
-		value,
-		nil,
-		errors.New("cannot meet either rule"),
-	})
+	validator.ErrorCollector().Add(validator.Location(), NewError(code.Invalid, value))
 }
 
 // When returns a new rule that verifies the value meets the rules and all common rules when cond returns true.
-func When(cond ConditionFunc, rules ...Rule) Rule {
-	return &whenRule{cond: cond, rules: rules}
+func When(cond ConditionFunc, rules ...Rule) *whenRule {
+	return &whenRule{cond: cond, whenRules: rules}
+}
+
+// Else set the rules that verified the value when cond returns false.
+func (r *whenRule) Else(rules ...Rule) Rule {
+	r.elseRules = rules
+	r.didCalledElse = true
+	return r
 }
 
 func (r *whenRule) Validate(validator *Validator, value interface{}) {
 	if r.cond(value) {
-		And(r.rules...).Validate(validator, value)
+		And(r.whenRules...).Validate(validator, value)
+	} else if r.didCalledElse {
+		And(r.elseRules...).Validate(validator, value)
 	}
 }
 
@@ -101,12 +101,6 @@ func (rule *eachRule) Validate(validator *Validator, value interface{}) {
 			})
 		}
 	default:
-		validator.ErrorCollector().Add(validator.Location(), &ErrorDetail{
-			InvalidTypeCode,
-			rule,
-			value,
-			nil,
-			errors.New("must be array or slice"),
-		})
+		validator.ErrorCollector().Add(validator.Location(), NewError(code.ArrayOnly, value))
 	}
 }

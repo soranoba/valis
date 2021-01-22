@@ -26,5 +26,5 @@ func ExampleWrapHengeResultFunc() {
 	}
 
 	// Output:
-	// (inclusion) is not included in [123], but got "123" (convert from 123)
+	// (inclusion) is not included in [123]
 }

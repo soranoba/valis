@@ -13,7 +13,7 @@ func TestIsType(t *testing.T) {
 
 	assert.EqualError(
 		v.Validate("", is.Required),
-		"(required) cannot be blank, but got \"\"",
+		"(required) is required",
 	)
 
 	assert.NoError(
@@ -24,7 +24,7 @@ func TestIsType(t *testing.T) {
 	)
 	assert.EqualError(
 		v.Validate("", when.IsType(reflect.TypeOf(""), is.Required)),
-		"(required) cannot be blank, but got \"\"",
+		"(required) is required",
 	)
 	assert.NoError(
 		v.Validate((*string)(nil), when.IsType(reflect.TypeOf(""), is.Required)),
@@ -44,7 +44,7 @@ func TestIsTypeOrPtr(t *testing.T) {
 
 	assert.EqualError(
 		v.Validate("", is.Required),
-		"(required) cannot be blank, but got \"\"",
+		"(required) is required",
 	)
 
 	assert.NoError(
@@ -55,11 +55,11 @@ func TestIsTypeOrPtr(t *testing.T) {
 	)
 	assert.EqualError(
 		v.Validate("", when.IsTypeOrPtr(reflect.TypeOf(""), is.Required)),
-		"(required) cannot be blank, but got \"\"",
+		"(required) is required",
 	)
 	assert.EqualError(
 		v.Validate((*string)(nil), when.IsTypeOrPtr(reflect.TypeOf(""), is.Required)),
-		"(required) cannot be blank, but got (*string)(nil)",
+		"(required) is required",
 	)
 
 	// NOTE: invalid type
@@ -76,7 +76,7 @@ func TestIsTypeOrElem(t *testing.T) {
 
 	assert.EqualError(
 		v.Validate((*string)(nil), is.Required),
-		"(required) cannot be blank, but got (*string)(nil)",
+		"(required) is required",
 	)
 
 	assert.NoError(
@@ -87,11 +87,11 @@ func TestIsTypeOrElem(t *testing.T) {
 	)
 	assert.EqualError(
 		v.Validate((*string)(nil), when.IsTypeOrElem(reflect.TypeOf((*string)(nil)), is.Required)),
-		"(required) cannot be blank, but got (*string)(nil)",
+		"(required) is required",
 	)
 	assert.EqualError(
 		v.Validate("", when.IsTypeOrElem(reflect.TypeOf((*string)(nil)), is.Required)),
-		"(required) cannot be blank, but got \"\"",
+		"(required) is required",
 	)
 
 	// NOTE: invalid type

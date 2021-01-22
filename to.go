@@ -1,5 +1,7 @@
 package valis
 
+import "github.com/soranoba/valis/code"
+
 type (
 	ConvertFunc func(value interface{}) (interface{}, error)
 )
@@ -16,10 +18,6 @@ type (
 	}
 )
 
-const (
-	ConvertToCode = "convert_to"
-)
-
 // To returns a new rule that verifies the converted value met all rules.
 func To(convertFunc ConvertFunc, rules ...Rule) Rule {
 	return &toRule{convertFunc: convertFunc, rules: rules}
@@ -28,13 +26,7 @@ func To(convertFunc ConvertFunc, rules ...Rule) Rule {
 func (rule *toRule) Validate(validator *Validator, value interface{}) {
 	newValue, err := rule.convertFunc(value)
 	if err != nil {
-		validator.ErrorCollector().Add(validator.Location(), &ErrorDetail{
-			ConvertToCode,
-			rule,
-			value,
-			nil,
-			err,
-		})
+		validator.ErrorCollector().Add(validator.Location(), NewError(code.ConversionFailed, value, err))
 		return
 	}
 
@@ -47,11 +39,11 @@ func newToRuleErrorCollector(errorCollector ErrorCollector, location Location, v
 	return &toRuleErrorCollector{ErrorCollector: errorCollector, loc: location, value: value}
 }
 
-func (c *toRuleErrorCollector) Add(loc Location, detail *ErrorDetail) {
+func (c *toRuleErrorCollector) Add(loc Location, err Error) {
 	if loc == c.loc {
-		newDetail := *detail
-		newDetail.UnconvertedValue = c.value
-		detail = &newDetail
+		newDetail := *err
+		newDetail.valueBeforeConversion = c.value
+		err = &newDetail
 	}
-	c.ErrorCollector.Add(loc, detail)
+	c.ErrorCollector.Add(loc, err)
 }

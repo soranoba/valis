@@ -3,6 +3,7 @@ package tests
 import (
 	"errors"
 	"github.com/soranoba/valis"
+	"github.com/soranoba/valis/code"
 	"github.com/soranoba/valis/helpers"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -47,11 +48,7 @@ func (p Person3) Validate(validator *valis.Validator) {
 	if p.Name == "" {
 		field := valishelpers.GetField(&p, &p.Name)
 		loc := validator.Location().FieldLocation(field)
-		validator.ErrorCollector().Add(loc, &valis.ErrorDetail{
-			Code:  "required",
-			Value: p.Name,
-			Err:   errors.New("cannot be blank"),
-		})
+		validator.ErrorCollector().Add(loc, valis.NewError(code.Required, p.Name))
 	}
 }
 
@@ -63,11 +60,7 @@ func (p *Person4) Validate(validator *valis.Validator) {
 	if p.Name == nil {
 		field := valishelpers.GetField(&p, &p.Name)
 		loc := validator.Location().FieldLocation(field)
-		validator.ErrorCollector().Add(loc, &valis.ErrorDetail{
-			Code:  "required",
-			Value: p.Name,
-			Err:   errors.New("cannot be blank"),
-		})
+		validator.ErrorCollector().Add(loc, valis.NewError(code.Required, p.Name))
 	}
 }
 
@@ -79,19 +72,19 @@ func TestValidatableRule(t *testing.T) {
 
 	assert := assert.New(t)
 
-	assert.EqualError(v.Validate(Person1{}, valis.ValidatableRule), "(validatable) name cannot be blank, but got tests.Person1{Name:\"\"}")
-	assert.EqualError(v.Validate(&Person1{}, valis.ValidatableRule), "(validatable) name cannot be blank, but got &tests.Person1{Name:\"\"}")
+	assert.EqualError(v.Validate(Person1{}, valis.ValidatableRule), "(custom) name cannot be blank")
+	assert.EqualError(v.Validate(&Person1{}, valis.ValidatableRule), "(custom) name cannot be blank")
 
 	// NOTE: the argument should be a pointer.
 	assert.NoError(v.Validate(Person2{}, valis.ValidatableRule))
-	assert.EqualError(v.Validate(&Person2{}, valis.ValidatableRule), "(validatable) name cannot be blank, but got &tests.Person2{Name:\"\"}")
+	assert.EqualError(v.Validate(&Person2{}, valis.ValidatableRule), "(custom) name cannot be blank")
 
-	assert.EqualError(v.Validate(Person3{}, valis.ValidatableRule), "(required) .Name cannot be blank, but got \"\"")
-	assert.EqualError(v.Validate(&Person3{}, valis.ValidatableRule), "(required) .Name cannot be blank, but got \"\"")
+	assert.EqualError(v.Validate(Person3{}, valis.ValidatableRule), "(required) .Name is required")
+	assert.EqualError(v.Validate(&Person3{}, valis.ValidatableRule), "(required) .Name is required")
 
 	// NOTE: the argument should be a pointer.
 	assert.NoError(v.Validate(Person4{}, valis.ValidatableRule))
-	assert.EqualError(v.Validate(&Person4{}, valis.ValidatableRule), "(required) .Name cannot be blank, but got (*string)(nil)")
+	assert.EqualError(v.Validate(&Person4{}, valis.ValidatableRule), "(required) .Name is required")
 
 	// NOTE: it will succeed if it does not implement Validatable
 	assert.NoError(v.Validate(struct{}{}, valis.ValidatableRule))

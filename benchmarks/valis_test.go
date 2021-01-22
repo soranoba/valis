@@ -35,8 +35,8 @@ func BenchmarkValis_SimpleStruct_field(b *testing.B) {
 		s := &Simple{}
 		if err := v.Validate(
 			s,
-			valis.Field(&s.FirstName, is.Required, is.LengthRange(0, 20)),
-			valis.Field(&s.LastName, is.Required, is.LengthRange(0, 20)),
+			valis.Field(&s.FirstName, is.Required, is.LengthBetween(0, 20)),
+			valis.Field(&s.LastName, is.Required, is.LengthBetween(0, 20)),
 		); err == nil {
 			panic("invalid results")
 		}
@@ -44,8 +44,8 @@ func BenchmarkValis_SimpleStruct_field(b *testing.B) {
 		s = &Simple{FirstName: "123456789012345678901", LastName: "123456789012345678901"}
 		if err := v.Validate(
 			s,
-			valis.Field(&s.FirstName, is.Required, is.LengthRange(0, 20)),
-			valis.Field(&s.LastName, is.Required, is.LengthRange(0, 20)),
+			valis.Field(&s.FirstName, is.Required, is.LengthBetween(0, 20)),
+			valis.Field(&s.LastName, is.Required, is.LengthBetween(0, 20)),
 		); err == nil {
 			panic("invalid results")
 		}

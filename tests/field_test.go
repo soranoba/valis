@@ -20,7 +20,7 @@ func TestField(t *testing.T) {
 			&user,
 			valis.Field(&user.Name, is.Required),
 		),
-		"(required) .Name cannot be blank, but got \"\"",
+		"(required) .Name is required",
 	)
 	assert.EqualError(
 		v.Validate(
@@ -28,7 +28,7 @@ func TestField(t *testing.T) {
 			valis.Field(&user.Name, is.Required),
 			valis.Field(&user.Age, is.Required),
 		),
-		"(required) .Name cannot be blank, but got \"\". (required) .Age cannot be blank, but got 0",
+		"(required) .Name is required\n(required) .Age is required",
 	)
 
 	alice := User{Name: "Alice", Age: 22}
@@ -41,7 +41,7 @@ func TestField(t *testing.T) {
 	)
 
 	// NOTE: it returns an error when the value is not struct
-	assert.EqualError(v.Validate("a", valis.Field(&user.Name)), "(invalid_type) must be a struct, but got \"a\"")
+	assert.EqualError(v.Validate("a", valis.Field(&user.Name)), "(struct_only) must be any struct")
 
 	// NOTE: it must be specified with pointers
 	assert.Panics(func() {
@@ -64,7 +64,7 @@ func TestField(t *testing.T) {
 	v.SetCommonRules(is.Required)
 	assert.EqualError(
 		v.Validate(&user, valis.Field(&user.Name), valis.Field(&user.Age)),
-		"(required) .Age cannot be blank, but got 0",
+		"(required) .Age is required",
 	)
 
 	// NOTE: CommonRules only check to the specified Field.

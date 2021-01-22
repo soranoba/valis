@@ -1,13 +1,8 @@
 package valis
 
 import (
-	"errors"
-	"fmt"
+	"github.com/soranoba/valis/code"
 	"reflect"
-)
-
-const (
-	KeyNotFoundCode = "not_found"
 )
 
 type (
@@ -37,25 +32,13 @@ func (rule *keyRule) Validate(validator *Validator, value interface{}) {
 	}
 
 	if val.Kind() != reflect.Map {
-		validator.ErrorCollector().Add(validator.Location(), &ErrorDetail{
-			InvalidTypeCode,
-			rule,
-			value,
-			nil,
-			errors.New("must be a map"),
-		})
+		validator.ErrorCollector().Add(validator.Location(), NewError(code.MapOnly, value))
 		return
 	}
 
 	keyVal := reflect.ValueOf(rule.key)
 	if !keyVal.Type().AssignableTo(val.Type().Key()) {
-		validator.ErrorCollector().Add(validator.Location(), &ErrorDetail{
-			InvalidTypeCode,
-			rule,
-			value,
-			nil,
-			fmt.Errorf("cannot assignable %s to key", keyVal.Type().String()),
-		})
+		validator.ErrorCollector().Add(validator.Location(), NewError(code.NotAssignable, value, keyVal.Type().String()))
 		return
 	}
 
@@ -65,13 +48,7 @@ func (rule *keyRule) Validate(validator *Validator, value interface{}) {
 			And(rule.rules...).Validate(v, mapValue.Interface())
 		})
 	} else {
-		validator.ErrorCollector().Add(validator.Location(), &ErrorDetail{
-			KeyNotFoundCode,
-			rule,
-			value,
-			nil,
-			fmt.Errorf("does not have the key (%v)", rule.key),
-		})
+		validator.ErrorCollector().Add(validator.Location(), NewError(code.NoKey, value, rule.key))
 	}
 }
 
@@ -86,13 +63,7 @@ func (rule *eachKeyRule) Validate(validator *Validator, value interface{}) {
 	}
 
 	if val.Kind() != reflect.Map {
-		validator.ErrorCollector().Add(validator.Location(), &ErrorDetail{
-			InvalidTypeCode,
-			rule,
-			value,
-			nil,
-			errors.New("must be a map"),
-		})
+		validator.ErrorCollector().Add(validator.Location(), NewError(code.MapOnly, value))
 		return
 	}
 
@@ -115,13 +86,7 @@ func (rule *eachValueRule) Validate(validator *Validator, value interface{}) {
 	}
 
 	if val.Kind() != reflect.Map {
-		validator.ErrorCollector().Add(validator.Location(), &ErrorDetail{
-			InvalidTypeCode,
-			rule,
-			value,
-			nil,
-			errors.New("must be a map"),
-		})
+		validator.ErrorCollector().Add(validator.Location(), NewError(code.MapOnly, value))
 		return
 	}
 

@@ -4,7 +4,7 @@ import (
 	"reflect"
 )
 
-// GetField returns the reflect.StructField of the field. When it is not found, it panics.
+// GetField returns the *reflect.StructField of the fieldPointer. When it is not found, it panics.
 func GetField(structPointer interface{}, fieldPointer interface{}) *reflect.StructField {
 	structVal := reflect.ValueOf(structPointer)
 	fieldVal := reflect.ValueOf(fieldPointer)

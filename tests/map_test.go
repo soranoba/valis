@@ -18,7 +18,7 @@ func TestKey(t *testing.T) {
 			valis.Key("a", is.In("B")),
 			valis.Key("b", is.In("A")),
 		),
-		"(inclusion) [key: a] is not included in [B], but got \"A\". (inclusion) [key: b] is not included in [A], but got \"B\"",
+		"(inclusion) [key: a] is not included in [B]\n(inclusion) [key: b] is not included in [A]",
 	)
 	assert.NoError(
 		v.Validate(
@@ -42,16 +42,17 @@ func TestKey(t *testing.T) {
 		&b: henge.New("B").StringPtr().Value(),
 		&c: nil,
 	}
-	if err := v.Validate(m, valis.Key("a", is.In("A"))); assert.Error(err) {
-		assert.True(strings.HasPrefix(err.Error(), "(invalid_type) cannot assignable string to key, "), err.Error())
-	}
+	assert.EqualError(
+		v.Validate(m, valis.Key("a", is.In("A"))),
+		"(not_assignable) can't assign to string",
+	)
 	if err := v.Validate(m, valis.Key(henge.New("a").StringPtr().Value())); assert.Error(err) {
-		assert.True(strings.HasPrefix(err.Error(), "(not_found) does not have the key"), err.Error())
+		assert.True(strings.HasPrefix(err.Error(), "(no_key) requires the value at the key"), err.Error())
 	}
 	assert.NoError(v.Validate(m, valis.Key(&a, is.Required), valis.Key(&b, is.Required)))
 
 	// NOTE: it returns an error when the value is not map
-	assert.EqualError(v.Validate("a", valis.Key(&a)), "(invalid_type) must be a map, but got \"a\"")
+	assert.EqualError(v.Validate("a", valis.Key(&a)), "(map_only) must be any map")
 
 	// NOTE: CommonRules automatically check.
 	v := valis.NewValidator()
@@ -60,7 +61,7 @@ func TestKey(t *testing.T) {
 	v.SetCommonRules(is.Required)
 	if err := v.Validate(m, valis.Key(&c)); assert.Error(err) {
 		assert.True(strings.HasPrefix(err.Error(), "(required) "), err.Error())
-		assert.True(strings.HasSuffix(err.Error(), "cannot be blank, but got (*string)(nil)"), err.Error())
+		assert.True(strings.HasSuffix(err.Error(), "is required"), err.Error())
 	}
 
 	// NOTE: CommonRules only check to the specified Field.
@@ -75,14 +76,14 @@ func TestEachKeys(t *testing.T) {
 	)
 	assert.EqualError(
 		v.Validate(map[string]string{"": "A", "b": "B"}, valis.EachKeys(is.Required)),
-		"(required) [key: ] cannot be blank, but got \"\"",
+		"(required) [key: ] is required",
 	)
 	assert.NoError(
 		v.Validate(&map[string]string{"a": "A", "b": "B"}, valis.EachKeys(is.Required)),
 	)
 
 	// NOTE: it returns an error when the value is not map
-	assert.EqualError(v.Validate("a", valis.EachKeys(is.Required)), "(invalid_type) must be a map, but got \"a\"")
+	assert.EqualError(v.Validate("a", valis.EachKeys(is.Required)), "(map_only) must be any map")
 
 	// NOTE: CommonRules automatically check, but values is not validated.
 	v := valis.NewValidator()
@@ -91,7 +92,7 @@ func TestEachKeys(t *testing.T) {
 	v.SetCommonRules(is.Required)
 	assert.EqualError(
 		v.Validate(map[string]string{"": "a", "b": ""}, valis.EachKeys(is.Any)),
-		"(required) [key: ] cannot be blank, but got \"\"",
+		"(required) [key: ] is required",
 	)
 }
 
@@ -103,14 +104,14 @@ func TestEachValues(t *testing.T) {
 	)
 	assert.EqualError(
 		v.Validate(map[string]string{"a": "A", "b": ""}, valis.EachValues(is.Required)),
-		"(required) [b] cannot be blank, but got \"\"",
+		"(required) [b] is required",
 	)
 	assert.NoError(
 		v.Validate(&map[string]string{"a": "A", "b": "B"}, valis.EachValues(is.Required)),
 	)
 
 	// NOTE: it returns an error when the value is not map
-	assert.EqualError(v.Validate("a", valis.EachValues(is.Required)), "(invalid_type) must be a map, but got \"a\"")
+	assert.EqualError(v.Validate("a", valis.EachValues(is.Required)), "(map_only) must be any map")
 
 	// NOTE: CommonRules automatically check, but values is not validated.
 	v := valis.NewValidator()
@@ -119,6 +120,6 @@ func TestEachValues(t *testing.T) {
 	v.SetCommonRules(is.Required)
 	assert.EqualError(
 		v.Validate(map[string]string{"": "a", "b": ""}, valis.EachValues(is.Any)),
-		"(required) [b] cannot be blank, but got \"\"",
+		"(required) [b] is required",
 	)
 }
