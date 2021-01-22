@@ -41,7 +41,7 @@ func TestField(t *testing.T) {
 	)
 
 	// NOTE: it returns an error when the value is not struct
-	assert.EqualError(v.Validate("a", valis.Field(&user.Name)), "(struct_only) must be any struct")
+	assert.EqualError(v.Validate("a", valis.Field(&user.Name)), "(not_struct) must be any struct")
 
 	// NOTE: it must be specified with pointers
 	assert.Panics(func() {

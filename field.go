@@ -30,7 +30,7 @@ func (r *fieldRule) Validate(validator *Validator, value interface{}) {
 	}
 
 	if val.Kind() != reflect.Struct {
-		validator.ErrorCollector().Add(validator.Location(), NewError(code.StructOnly, value))
+		validator.ErrorCollector().Add(validator.Location(), NewError(code.NotStruct, value))
 		return
 	}
 

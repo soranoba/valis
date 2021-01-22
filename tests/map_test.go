@@ -52,7 +52,7 @@ func TestKey(t *testing.T) {
 	assert.NoError(v.Validate(m, valis.Key(&a, is.Required), valis.Key(&b, is.Required)))
 
 	// NOTE: it returns an error when the value is not map
-	assert.EqualError(v.Validate("a", valis.Key(&a)), "(map_only) must be any map")
+	assert.EqualError(v.Validate("a", valis.Key(&a)), "(not_map) must be any map")
 
 	// NOTE: CommonRules automatically check.
 	v := valis.NewValidator()
@@ -83,7 +83,7 @@ func TestEachKeys(t *testing.T) {
 	)
 
 	// NOTE: it returns an error when the value is not map
-	assert.EqualError(v.Validate("a", valis.EachKeys(is.Required)), "(map_only) must be any map")
+	assert.EqualError(v.Validate("a", valis.EachKeys(is.Required)), "(not_map) must be any map")
 
 	// NOTE: CommonRules automatically check, but values is not validated.
 	v := valis.NewValidator()
@@ -111,7 +111,7 @@ func TestEachValues(t *testing.T) {
 	)
 
 	// NOTE: it returns an error when the value is not map
-	assert.EqualError(v.Validate("a", valis.EachValues(is.Required)), "(map_only) must be any map")
+	assert.EqualError(v.Validate("a", valis.EachValues(is.Required)), "(not_map) must be any map")
 
 	// NOTE: CommonRules automatically check, but values is not validated.
 	v := valis.NewValidator()

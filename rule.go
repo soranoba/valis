@@ -31,10 +31,6 @@ type (
 )
 
 var (
-	// StandardRules is common rules by default.
-	StandardRules = [...]Rule{
-		ValidatableRule,
-	}
 	// ValidatableRule is a rule that executes Validate methods if the value implements Validatable or ValidatableWithValidator at verifying.
 	ValidatableRule Rule = &validatableRule{}
 )

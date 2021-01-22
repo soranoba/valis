@@ -61,7 +61,7 @@ func TestEach(t *testing.T) {
 	)
 
 	// NOTE: value must be array or slice.
-	assert.EqualError(v.Validate("", valis.Each(is.Required)), "(array_only) must be any array")
+	assert.EqualError(v.Validate("", valis.Each(is.Required)), "(not_array) must be any array")
 
 	// NOTE: CommonRules automatically check.
 	v := valis.NewValidator()

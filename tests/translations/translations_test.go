@@ -35,19 +35,19 @@ func TestTranslations(t *testing.T) {
 	ja := language.Japanese
 
 	data := []*Data{
-		f(code.StringOnly)(Results{
+		f(code.NotString)(Results{
 			en: "must be a string",
 			ja: "must be a string",
 		}),
-		f(code.StructOnly)(Results{
+		f(code.NotStruct)(Results{
 			en: "must be any struct",
 			ja: "must be any struct",
 		}),
-		f(code.ArrayOnly)(Results{
+		f(code.NotArray)(Results{
 			en: "must be any array",
 			ja: "must be any array",
 		}),
-		f(code.MapOnly)(Results{
+		f(code.NotMap)(Results{
 			en: "must be any map",
 			ja: "must be any map",
 		}),
@@ -98,6 +98,22 @@ func TestTranslations(t *testing.T) {
 		f(code.TooShortLen, 10)(Results{
 			en: "is too few elements (minimum is 10 elements)",
 			ja: "は10要素以上必要です",
+		}),
+		f(code.GreaterThan, 10)(Results{
+			en: "must be greater than 10",
+			ja: "は10以上の値にする必要があります",
+		}),
+		f(code.LessThan, 10)(Results{
+			en: "must be less than 10",
+			ja: "は10以下の値にする必要があります",
+		}),
+		f(code.GreaterThanOrEqual, 10)(Results{
+			en: "must be greater than or equal to 10",
+			ja: "は10より大きい値にする必要があります",
+		}),
+		f(code.LessThanOrEqual, 10)(Results{
+			en: "must be less than or equal to 10",
+			ja: "は10より小さい値にする必要があります",
 		}),
 		f(code.Inclusion, []interface{}{"male", "female"})(Results{
 			en: "is not included in [male female]",

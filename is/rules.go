@@ -2,8 +2,10 @@ package is
 
 import (
 	"errors"
+	"github.com/soranoba/henge"
 	"github.com/soranoba/valis"
 	"github.com/soranoba/valis/code"
+	"math"
 	"reflect"
 	"unicode/utf8"
 )
@@ -24,6 +26,12 @@ type (
 		min int
 		max int
 	}
+	rangeRule struct {
+		lower            interface{}
+		isExcludingLower bool
+		upper            interface{}
+		isExcludingUpper bool
+	}
 )
 
 var (
@@ -36,6 +44,10 @@ var (
 	NilOrNonZero valis.Rule = &nilOrNonZeroRule{}
 	// Any is a rule indicating that any value is acceptable.
 	Any valis.Rule = &anyRule{}
+	// GreaterThanOrEqualTo is equiv to Min
+	GreaterThanOrEqualTo = Min
+	// LessThanOrEqualTo is equiv to Max
+	LessThanOrEqualTo = Max
 )
 
 var (
@@ -130,7 +142,7 @@ func (rule *lengthRule) Validate(validator *valis.Validator, value interface{}) 
 		str := val.Interface().(string)
 		length = utf8.RuneCountInString(str)
 	default:
-		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.StringOnly, value))
+		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.NotString, value))
 		return
 	}
 
@@ -167,5 +179,126 @@ func (rule *lenRule) Validate(validator *valis.Validator, value interface{}) {
 	}
 	if length > rule.max {
 		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.TooLongLen, value, rule.max))
+	}
+}
+
+func Min(min interface{}) valis.Rule {
+	return Range(min, nil)
+}
+
+func Max(max interface{}) valis.Rule {
+	return Range(nil, max)
+}
+
+func GreaterThan(num interface{}) valis.Rule {
+	val := reflect.ValueOf(num)
+	if !isNumeric(val) {
+		panic("num must be a numeric value")
+	}
+	return &rangeRule{lower: num, isExcludingLower: true}
+}
+
+func LessThan(num interface{}) valis.Rule {
+	val := reflect.ValueOf(num)
+	if !isNumeric(val) {
+		panic("num must be a numeric value")
+	}
+	return &rangeRule{upper: num, isExcludingUpper: true}
+}
+
+func Range(min interface{}, max interface{}) valis.Rule {
+	for _, val := range []reflect.Value{reflect.ValueOf(min), reflect.ValueOf(max)} {
+		if val.Kind() == reflect.Invalid {
+			continue
+		}
+		if !isNumeric(val) {
+			panic("arguments must be numeric values")
+		}
+	}
+	return &rangeRule{lower: min, upper: max}
+}
+
+func (rule *rangeRule) Validate(validator *valis.Validator, value interface{}) {
+	val := reflect.ValueOf(value)
+	for val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
+	var lowerOpt, upperOpt = henge.WithRoundingFunc(math.Ceil), henge.WithRoundingFunc(math.Floor)
+	if rule.isExcludingLower {
+		lowerOpt = henge.WithRoundingFunc(math.Floor)
+	}
+	if rule.isExcludingUpper {
+		upperOpt = henge.WithRoundingFunc(math.Ceil)
+	}
+
+	addInvalidLower := func(lower interface{}) {
+		if rule.isExcludingLower {
+			validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.GreaterThan, value, rule.lower))
+		} else {
+			validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.GreaterThanOrEqual, value, rule.lower))
+		}
+	}
+	addInvalidUpper := func(upper interface{}) {
+		if rule.isExcludingUpper {
+			validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.LessThan, value, rule.upper))
+		} else {
+			validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.LessThanOrEqual, value, rule.upper))
+		}
+	}
+
+	switch val.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		var lower int64 = math.MinInt64
+		henge.New(rule.lower, lowerOpt).Convert(&lower)
+		var upper int64 = math.MaxInt64
+		henge.New(rule.upper, upperOpt).Convert(&upper)
+
+		i := val.Int()
+		if (rule.isExcludingLower && i <= lower) || (!rule.isExcludingLower && i < lower) {
+			addInvalidLower(lower)
+		}
+		if (rule.isExcludingUpper && i >= upper) || (!rule.isExcludingUpper && i > upper) {
+			addInvalidUpper(upper)
+		}
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		var lower uint64
+		henge.New(rule.lower, lowerOpt).Convert(&lower)
+		var upper uint64 = math.MaxUint64
+		henge.New(rule.upper, upperOpt).Convert(&upper)
+
+		u := val.Uint()
+		if (rule.isExcludingLower && u <= lower) || (!rule.isExcludingLower && u < lower) {
+			addInvalidLower(lower)
+		}
+		if (rule.isExcludingUpper && u >= upper) || (!rule.isExcludingUpper && u > upper) {
+			addInvalidUpper(upper)
+		}
+	case reflect.Float32, reflect.Float64:
+		var lower float64 = -math.MaxFloat64
+		henge.New(rule.lower).Convert(&lower)
+		var upper float64 = math.MaxFloat64
+		henge.New(rule.upper).Convert(&upper)
+
+		f := val.Float()
+		if (rule.isExcludingLower && f <= lower) || (!rule.isExcludingLower && f < lower) {
+			addInvalidLower(lower)
+		}
+		if (rule.isExcludingUpper && f >= upper) || (!rule.isExcludingUpper && f > upper) {
+			addInvalidUpper(upper)
+		}
+	default:
+		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.NotNumeric, value))
+	}
+}
+
+func isNumeric(v reflect.Value) bool {
+	switch v.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+		reflect.Float32, reflect.Float64:
+		return true
+	default:
+		return false
 	}
 }

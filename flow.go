@@ -101,6 +101,6 @@ func (rule *eachRule) Validate(validator *Validator, value interface{}) {
 			})
 		}
 	default:
-		validator.ErrorCollector().Add(validator.Location(), NewError(code.ArrayOnly, value))
+		validator.ErrorCollector().Add(validator.Location(), NewError(code.NotArray, value))
 	}
 }

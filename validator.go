@@ -28,7 +28,6 @@ type (
 // NewValidator returns a new Validator.
 func NewValidator() *Validator {
 	v := &Validator{
-		commonRules: StandardRules[:],
 		errorCollectorFactoryFunc: func() ErrorCollector {
 			return NewStandardErrorCollector(DefaultLocationNameResolver)
 		},

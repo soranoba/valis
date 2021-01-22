@@ -32,7 +32,7 @@ func (rule *keyRule) Validate(validator *Validator, value interface{}) {
 	}
 
 	if val.Kind() != reflect.Map {
-		validator.ErrorCollector().Add(validator.Location(), NewError(code.MapOnly, value))
+		validator.ErrorCollector().Add(validator.Location(), NewError(code.NotMap, value))
 		return
 	}
 
@@ -63,7 +63,7 @@ func (rule *eachKeyRule) Validate(validator *Validator, value interface{}) {
 	}
 
 	if val.Kind() != reflect.Map {
-		validator.ErrorCollector().Add(validator.Location(), NewError(code.MapOnly, value))
+		validator.ErrorCollector().Add(validator.Location(), NewError(code.NotMap, value))
 		return
 	}
 
@@ -86,7 +86,7 @@ func (rule *eachValueRule) Validate(validator *Validator, value interface{}) {
 	}
 
 	if val.Kind() != reflect.Map {
-		validator.ErrorCollector().Add(validator.Location(), NewError(code.MapOnly, value))
+		validator.ErrorCollector().Add(validator.Location(), NewError(code.NotMap, value))
 		return
 	}
 

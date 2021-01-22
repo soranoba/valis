@@ -12,10 +12,10 @@ func DefaultEnglish(c *catalog.Builder) {
 	tag := language.English
 
 	// type error
-	c.Set(tag, code.StringOnly, catalog.String("must be a string"))
-	c.Set(tag, code.StructOnly, catalog.String("must be any struct"))
-	c.Set(tag, code.ArrayOnly, catalog.String("must be any array"))
-	c.Set(tag, code.MapOnly, catalog.String("must be any map"))
+	c.Set(tag, code.NotString, catalog.String("must be a string"))
+	c.Set(tag, code.NotStruct, catalog.String("must be any struct"))
+	c.Set(tag, code.NotArray, catalog.String("must be any array"))
+	c.Set(tag, code.NotMap, catalog.String("must be any map"))
 	c.Set(tag, code.NotAssignable, catalog.String("can't assign to %[1]s"))
 
 	// not found error
@@ -47,6 +47,10 @@ func DefaultEnglish(c *catalog.Builder) {
 		catalog.Var("elements", plural.Selectf(1, "", plural.One, "element", plural.Other, "elements")),
 		catalog.String("is too few elements (minimum is %[1]d ${elements})"),
 	)
+	c.Set(tag, code.GreaterThan, catalog.String("must be greater than %[1]v"))
+	c.Set(tag, code.LessThan, catalog.String("must be less than %[1]v"))
+	c.Set(tag, code.GreaterThanOrEqual, catalog.String("must be greater than or equal to %[1]v"))
+	c.Set(tag, code.LessThanOrEqual, catalog.String("must be less than or equal to %[1]v"))
 
 	c.Set(tag, code.Inclusion, catalog.String("is not included in %[1]v"))
 }
