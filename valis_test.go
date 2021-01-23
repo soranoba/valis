@@ -2,13 +2,15 @@ package valis_test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	valistag "github.com/soranoba/valis/tag"
-	"github.com/soranoba/valis/when"
+	"github.com/soranoba/valis/to"
 
 	"github.com/soranoba/valis"
 	"github.com/soranoba/valis/is"
+	valistag "github.com/soranoba/valis/tag"
 	"github.com/soranoba/valis/translations"
+	"github.com/soranoba/valis/when"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 	"golang.org/x/text/message/catalog"
@@ -125,14 +127,97 @@ func Example_structTag() {
 	}
 
 	v := valis.NewValidator()
-	v.SetCommonRules(when.IsStruct(valis.EachFields(valistag.Required, valistag.Validate)))
-
 	u := User{}
-	if err := v.Validate(&u); err != nil {
+	if err := v.Validate(&u, when.IsStruct(valis.EachFields(valistag.Required, valistag.Validate))); err != nil {
 		fmt.Println(err)
 	}
 
 	// Output:
 	// (required) .Name is required
 	// (gte) .Age must be greater than or equal to 20
+}
+
+type ValidatableUser struct {
+	Name string
+}
+
+func (u *ValidatableUser) Validate() error {
+	if u.Name == "" {
+		return errors.New("name is empty")
+	}
+	return nil
+}
+
+func Example_validatable() {
+	v := valis.NewValidator()
+
+	// *ValidatableUser is implemented `Validate() error`
+	// Validate returns nil, when Name is not empty. Otherwise, it returns an error.
+	user := ValidatableUser{}
+	if err := v.Validate(&user, valis.ValidatableRule); err != nil {
+		fmt.Println(err)
+	}
+
+	// Output:
+	// (custom) name is empty
+}
+
+func Example_nestedStruct() {
+	type User struct {
+		Name    string `required:"true"`
+		Age     int    `validate:"min=20"`
+		Company struct {
+			Location string `required:"true"`
+		}
+	}
+
+	v := valis.NewValidator()
+	// Use the CommonRule if you want to automatically search and validate all hierarchies.
+	v.SetCommonRules(when.IsStruct(valis.EachFields(valistag.Required, valistag.Validate)))
+
+	user := User{}
+	if err := v.Validate(&user); err != nil {
+		fmt.Println(err)
+	}
+
+	// Output:
+	// (required) .Name is required
+	// (gte) .Age must be greater than or equal to 20
+	// (required) .Company.Location is required
+}
+
+func Example_flow() {
+	arr := []interface{}{0, 1, 2, 3, "a", "b", "c", "A", "B", "C"}
+
+	v := valis.NewValidator()
+
+	if err := v.Validate(
+		&arr,
+		valis.Each(
+			when.IsNumeric(is.In(1, 2, 3)).
+				Else(is.In("a", "b", "c")),
+		),
+	); err != nil {
+		fmt.Println(err)
+	}
+
+	// Output:
+	// (inclusion) [0] is not included in [1 2 3]
+	// (inclusion) [7] is not included in [a b c]
+	// (inclusion) [8] is not included in [a b c]
+	// (inclusion) [9] is not included in [a b c]
+}
+
+func Example_convert() {
+	arr := []interface{}{0, 1, 2, 3, "1", "2", "3"}
+
+	v := valis.NewValidator()
+	if err := v.Validate(&arr, valis.Each(to.Int(is.Min(2)))); err != nil {
+		fmt.Println(err)
+	}
+
+	// Output:
+	// (gte) [0] must be greater than or equal to 2
+	// (gte) [1] must be greater than or equal to 2
+	// (gte) [4] must be greater than or equal to 2
 }

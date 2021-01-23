@@ -46,10 +46,6 @@ var (
 	NilOrNonZero valis.Rule = &nilOrNonZeroRule{}
 	// Any is a rule indicating that any value is acceptable.
 	Any valis.Rule = &anyRule{}
-	// GreaterThanOrEqualTo is equiv to Min
-	GreaterThanOrEqualTo = Min
-	// LessThanOrEqualTo is equiv to Max
-	LessThanOrEqualTo = Max
 )
 
 var (
@@ -127,6 +123,8 @@ func (rule *inclusionRule) Validate(validator *valis.Validator, value interface{
 	validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.Inclusion, value, rule.values))
 }
 
+// LengthBetween returns a rule to verify the length of the value is between min and max.
+// if the verifying value is not a string, the rule considers that the value is invalid.
 func LengthBetween(min int, max int) valis.Rule {
 	return &lengthRule{min: min, max: max}
 }
@@ -156,6 +154,7 @@ func (rule *lengthRule) Validate(validator *valis.Validator, value interface{}) 
 	}
 }
 
+// LenBetween returns a rule to verify the len(value) is between min and max.
 func LenBetween(min int, max int) valis.Rule {
 	return &lenRule{min: min, max: max}
 }
@@ -184,14 +183,17 @@ func (rule *lenRule) Validate(validator *valis.Validator, value interface{}) {
 	}
 }
 
+// Min returns a rule to verify that the value >= min.
 func Min(min interface{}) valis.Rule {
 	return Range(min, nil)
 }
 
+// Max returns a rule to verify that the value <= max.
 func Max(max interface{}) valis.Rule {
 	return Range(nil, max)
 }
 
+// GreaterThan returns a rule to verify that the value > num.
 func GreaterThan(num interface{}) valis.Rule {
 	if !valishelpers.IsNumeric(num) {
 		panic("num must be a numeric value")
@@ -199,6 +201,7 @@ func GreaterThan(num interface{}) valis.Rule {
 	return &rangeRule{lower: num, isExcludingLower: true}
 }
 
+// LessThan returns a rule to verify that the value < num.
 func LessThan(num interface{}) valis.Rule {
 	if !valishelpers.IsNumeric(num) {
 		panic("num must be a numeric value")
@@ -206,6 +209,17 @@ func LessThan(num interface{}) valis.Rule {
 	return &rangeRule{upper: num, isExcludingUpper: true}
 }
 
+// GreaterThanOrEqualTo is equiv to Min
+func GreaterThanOrEqualTo(num interface{}) valis.Rule {
+	return Min(num)
+}
+
+// LessThanOrEqualTo is equiv to Max
+func LessThanOrEqualTo(num interface{}) valis.Rule {
+	return Max(num)
+}
+
+// Range returns a rule to verify that the value is between min and max.
 func Range(min interface{}, max interface{}) valis.Rule {
 	for _, val := range []interface{}{min, max} {
 		if !reflect.ValueOf(val).IsValid() {
