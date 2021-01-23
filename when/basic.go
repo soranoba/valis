@@ -1,6 +1,7 @@
 package when
 
 import (
+	valishelpers "github.com/soranoba/valis/helpers"
 	"reflect"
 
 	"github.com/soranoba/valis"
@@ -49,4 +50,9 @@ func IsTypeOrElem(ty reflect.Type, rules ...valis.Rule) valis.WhenRule {
 		return val.Type() == ty || reflect.PtrTo(val.Type()) == ty
 	}
 	return valis.When(cond, rules...)
+}
+
+// IsNumeric returns a new valis.WhenRule that verifies the value meets the rules when the value is numeric.
+func IsNumeric(rules ...valis.Rule) valis.WhenRule {
+	return valis.When(valishelpers.IsNumeric, rules...)
 }

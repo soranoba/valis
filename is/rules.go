@@ -2,12 +2,14 @@ package is
 
 import (
 	"errors"
-	"github.com/soranoba/henge"
-	"github.com/soranoba/valis"
-	"github.com/soranoba/valis/code"
 	"math"
 	"reflect"
 	"unicode/utf8"
+
+	"github.com/soranoba/henge"
+	"github.com/soranoba/valis"
+	"github.com/soranoba/valis/code"
+	valishelpers "github.com/soranoba/valis/helpers"
 )
 
 type (
@@ -191,27 +193,25 @@ func Max(max interface{}) valis.Rule {
 }
 
 func GreaterThan(num interface{}) valis.Rule {
-	val := reflect.ValueOf(num)
-	if !isNumeric(val) {
+	if !valishelpers.IsNumeric(num) {
 		panic("num must be a numeric value")
 	}
 	return &rangeRule{lower: num, isExcludingLower: true}
 }
 
 func LessThan(num interface{}) valis.Rule {
-	val := reflect.ValueOf(num)
-	if !isNumeric(val) {
+	if !valishelpers.IsNumeric(num) {
 		panic("num must be a numeric value")
 	}
 	return &rangeRule{upper: num, isExcludingUpper: true}
 }
 
 func Range(min interface{}, max interface{}) valis.Rule {
-	for _, val := range []reflect.Value{reflect.ValueOf(min), reflect.ValueOf(max)} {
-		if val.Kind() == reflect.Invalid {
+	for _, val := range []interface{}{min, max} {
+		if !reflect.ValueOf(val).IsValid() {
 			continue
 		}
-		if !isNumeric(val) {
+		if !valishelpers.IsNumeric(val) {
 			panic("arguments must be numeric values")
 		}
 	}
@@ -289,16 +289,5 @@ func (rule *rangeRule) Validate(validator *valis.Validator, value interface{}) {
 		}
 	default:
 		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.NotNumeric, value))
-	}
-}
-
-func isNumeric(v reflect.Value) bool {
-	switch v.Kind() {
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
-		reflect.Float32, reflect.Float64:
-		return true
-	default:
-		return false
 	}
 }

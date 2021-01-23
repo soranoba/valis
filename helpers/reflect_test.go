@@ -14,3 +14,15 @@ func ExampleGetField() {
 	// Output:
 	// Type of Name field is string
 }
+
+func ExampleIsNumeric() {
+	if IsNumeric(1.25) {
+		fmt.Println("float is numeric")
+	}
+	if !IsNumeric("1.25") {
+		fmt.Println("string is not numeric")
+	}
+	// Output:
+	// float is numeric
+	// string is not numeric
+}

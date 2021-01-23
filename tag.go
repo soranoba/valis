@@ -7,66 +7,49 @@ import (
 )
 
 type (
-	TagRuleFunc func(tagValue string) ([]Rule, error)
+	FieldTagRule     *fieldTagRule
+	FieldTagRuleFunc func(tagValue string) ([]Rule, error)
 )
 
 type (
-	tagRule struct {
+	fieldTagRule struct {
 		key      string
-		ruleFunc TagRuleFunc
+		ruleFunc FieldTagRuleFunc
 		lock     *sync.RWMutex
 		cache    map[reflect.StructTag][]Rule
 	}
 )
 
-// NewTagRule returns a new rule, that call ruleFunc when it found any fields that have the tag.
-func NewTagRule(key string, ruleFunc TagRuleFunc) Rule {
-	return &tagRule{key: key, ruleFunc: ruleFunc, lock: &sync.RWMutex{}, cache: map[reflect.StructTag][]Rule{}}
+// NewFieldTagRule returns a new rule, that call ruleFunc when it found any fields that have the tag.
+func NewFieldTagRule(key string, ruleFunc FieldTagRuleFunc) *fieldTagRule {
+	return &fieldTagRule{key: key, ruleFunc: ruleFunc, lock: &sync.RWMutex{}, cache: map[reflect.StructTag][]Rule{}}
 }
 
-func (r *tagRule) Validate(validator *Validator, value interface{}) {
-	val := reflect.ValueOf(value)
-	for val.Kind() == reflect.Ptr {
-		val = val.Elem()
-	}
-
-	if val.Kind() != reflect.Struct {
+func (r *fieldTagRule) Validate(validator *Validator, value interface{}) {
+	loc := validator.Location()
+	if loc.Kind() != LocationKindField {
 		return
 	}
 
-	for i := 0; i < val.NumField(); i++ {
-		fieldVal := val.Field(i)
-		if !fieldVal.IsValid() {
-			continue
-		}
+	field := loc.Field()
+	r.lock.RLock()
+	rules, ok := r.cache[field.Tag]
+	r.lock.RUnlock()
 
-		field := val.Type().Field(i)
-
-		r.lock.RLock()
-		rules, ok := r.cache[field.Tag]
-		r.lock.RUnlock()
-
-		if !ok {
-			if tag, ok := field.Tag.Lookup(r.key); ok {
-				var err error
-				rules, err = r.ruleFunc(tag)
-				if err != nil {
-					panic(fmt.Sprintf("%s (key = %s, path = %s)", err.Error(), r.key, field.PkgPath))
-				}
-
-				r.lock.Lock()
-				r.cache[field.Tag] = rules
-				r.lock.Unlock()
-			} else {
-				continue
+	if !ok {
+		if tag, ok := field.Tag.Lookup(r.key); ok {
+			var err error
+			rules, err = r.ruleFunc(tag)
+			if err != nil {
+				panic(fmt.Sprintf("%s (key = %s, path = %s)", err.Error(), r.key, field.PkgPath))
 			}
-		}
 
-		fieldValue := fieldVal.Interface()
-		validator.DiveField(&field, func(v *Validator) {
-			for _, rule := range rules {
-				rule.Validate(validator, fieldValue)
-			}
-		})
+			r.lock.Lock()
+			r.cache[field.Tag] = rules
+			r.lock.Unlock()
+		} else {
+			return
+		}
 	}
+	And(rules...).Validate(validator, value)
 }

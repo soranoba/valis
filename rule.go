@@ -11,10 +11,11 @@ type (
 	Rule interface {
 		Validate(validator *Validator, value interface{})
 	}
-	WhenRule = *whenRule
 	// CombinationRule is a high-order function that returns a new Rule.
 	CombinationRule func(rules ...Rule) Rule
+)
 
+type (
 	// If implemented, Validate will be executed by the ValidatableRule.
 	Validatable interface {
 		Validate() error
@@ -26,8 +27,7 @@ type (
 )
 
 type (
-	validatableRule struct {
-	}
+	validatableRule struct{}
 )
 
 var (

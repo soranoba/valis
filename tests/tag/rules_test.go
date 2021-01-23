@@ -26,12 +26,12 @@ func TestRequired(t *testing.T) {
 	}
 
 	assert.EqualError(
-		v.Validate(User{}, valistag.Required),
+		v.Validate(User{}, valis.EachFields(valistag.Required)),
 		"(required) .FirstName is required\n"+
 			"(required) .Age is required",
 	)
 	assert.NoError(
-		v.Validate(&User{FirstName: "Taro", LastName: "Soto", Age: 20}, valistag.Required),
+		v.Validate(&User{FirstName: "Taro", LastName: "Soto", Age: 20}, valis.EachFields(valistag.Required)),
 	)
 }
 
@@ -42,11 +42,11 @@ func TestValidate_required(t *testing.T) {
 		Name string `validate:"required"`
 	}
 	assert.EqualError(
-		v.Validate(User{}, valistag.Validate),
+		v.Validate(User{}, valis.EachFields(valistag.Validate)),
 		"(required) .Name is required",
 	)
 	assert.NoError(
-		v.Validate(&User{Name: "Alice"}, valistag.Validate),
+		v.Validate(&User{Name: "Alice"}, valis.EachFields(valistag.Validate)),
 	)
 }
 
@@ -63,7 +63,7 @@ func TestValidate_min(t *testing.T) {
 			Name:   "🍺",
 			Tags:   []string{""},
 			Params: map[string]string{"": ""},
-		}, valistag.Validate),
+		}, valis.EachFields(valistag.Validate)),
 		`(too_short_length) .Name is too short length (minimum is 2 characters)
 (too_short_len) .Tags is too few elements (minimum is 2 elements)
 (too_short_len) .Params is too few elements (minimum is 2 elements)`,
@@ -73,7 +73,7 @@ func TestValidate_min(t *testing.T) {
 			Name:   "Alice",
 			Tags:   []string{"", ""},
 			Params: map[string]string{"a": "", "b": ""},
-		}, valistag.Validate),
+		}, valis.EachFields(valistag.Validate)),
 	)
 }
 
@@ -90,7 +90,7 @@ func TestValidate_max(t *testing.T) {
 			Name:   "abc",
 			Tags:   []string{"a", "b", "c"},
 			Params: map[string]string{"a": "", "b": "", "c": ""},
-		}, valistag.Validate),
+		}, valis.EachFields(valistag.Validate)),
 		`(too_long_length) .Name is too long length (maximum is 2 characters)
 (too_long_len) .Tags is too many elements (maximum is 2 elements)
 (too_long_len) .Params is too many elements (maximum is 2 elements)`,
@@ -100,6 +100,6 @@ func TestValidate_max(t *testing.T) {
 			Name:   "🍺🍺",
 			Tags:   []string{"", ""},
 			Params: map[string]string{"a": "", "b": ""},
-		}, valistag.Validate),
+		}, valis.EachFields(valistag.Validate)),
 	)
 }

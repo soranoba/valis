@@ -102,3 +102,24 @@ func TestIsTypeOrElem(t *testing.T) {
 		v.Validate("", when.IsTypeOrElem(reflect.TypeOf(nil), is.Required))
 	})
 }
+
+func TestIsNumeric(t *testing.T) {
+	assert := assert.New(t)
+
+	assert.EqualError(
+		v.Validate("aa", is.Zero),
+		"(zero_only) must be blank",
+	)
+
+	assert.NoError(
+		v.Validate("aa", when.IsNumeric(is.Zero)),
+	)
+	assert.EqualError(
+		v.Validate(1.25, when.IsNumeric(is.Zero)),
+		"(zero_only) must be blank",
+	)
+	assert.EqualError(
+		v.Validate(1, when.IsNumeric(is.Zero)),
+		"(zero_only) must be blank",
+	)
+}

@@ -7,7 +7,6 @@ bench:
 
 test:
 	go test ./... -count=1
-	cd to; go test ./... -count=1
 	cd tests; go test ./... -count=1
 
 format:
@@ -16,3 +15,8 @@ format:
 lint:
 	gofmt -d ./
 	test -z $(shell gofmt -l ./)
+
+tidy:
+	go mod tidy; go mod verify
+	cd tests; go mod tidy; go mod verify;
+	cd benchmarks; go mod tidy; go mod verify;

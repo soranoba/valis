@@ -31,6 +31,109 @@ func TestWhen(t *testing.T) {
 	assert.NoError(v.Validate("", valis.When(Never, is.Required)))
 }
 
+func TestWhen_ElseIf(t *testing.T) {
+	assert := assert.New(t)
+
+	Any := func(interface{}) bool { return true }
+	Never := func(interface{}) bool { return false }
+	assert.NoError(
+		v.Validate("", valis.When(Never, is.Zero)),
+	)
+	assert.EqualError(
+		v.Validate("", valis.When(Never, is.Zero).ElseIf(Any, is.Required)),
+		"(required) is required",
+	)
+	assert.NoError(
+		v.Validate("", valis.When(Any, is.Zero).ElseIf(Any, is.Required)),
+	)
+}
+
+func TestWhen_ElseWhen(t *testing.T) {
+	assert := assert.New(t)
+
+	Any := func(interface{}) bool { return true }
+	Never := func(interface{}) bool { return false }
+	assert.NoError(
+		v.Validate("", valis.When(Never, is.Zero)),
+	)
+	assert.EqualError(
+		v.Validate("",
+			valis.When(Never, is.Zero).
+				ElseWhen(valis.When(Any, is.Required))),
+		"(required) is required",
+	)
+	assert.EqualError(
+		v.Validate("",
+			valis.When(Never, is.Zero).
+				ElseIf(Never, is.Zero).
+				ElseWhen(valis.When(Any, is.Required))),
+		"(required) is required",
+	)
+	assert.EqualError(
+		v.Validate("",
+			valis.When(Never, is.Zero).
+				ElseWhen(valis.When(Never, is.Zero)).
+				ElseIf(Any, is.Required)),
+		"(required) is required",
+	)
+	assert.EqualError(
+		v.Validate("",
+			valis.When(Never, is.Zero).
+				ElseWhen(valis.When(Never, is.Zero).ElseIf(Any, is.Required)).
+				ElseIf(Any, is.In(0))),
+		"(required) is required",
+	)
+	assert.NoError(
+		v.Validate("",
+			valis.When(Any, is.Zero).
+				ElseWhen(valis.When(Never, is.Required))),
+	)
+}
+
+func TestWhen_Else(t *testing.T) {
+	assert := assert.New(t)
+
+	Any := func(interface{}) bool { return true }
+	Never := func(interface{}) bool { return false }
+	assert.NoError(
+		v.Validate("", valis.When(Never, is.Zero)),
+	)
+	assert.EqualError(
+		v.Validate("",
+			valis.When(Never, is.Zero).
+				Else(valis.When(Any, is.Required))),
+		"(required) is required",
+	)
+	assert.EqualError(
+		v.Validate("",
+			valis.When(Never, is.Zero).
+				ElseIf(Never, is.Zero).
+				Else(is.Required)),
+		"(required) is required",
+	)
+	assert.EqualError(
+		v.Validate("",
+			valis.When(Never, is.Zero).
+				ElseWhen(valis.When(Any, is.Required)).
+				Else(is.In())),
+		"(required) is required",
+	)
+	assert.EqualError(
+		v.Validate("",
+			valis.When(Never, is.Zero).
+				ElseWhen(valis.When(Never, is.Zero).ElseIf(Any, is.Required)).
+				Else(is.In())),
+		"(required) is required",
+	)
+	assert.EqualError(
+		v.Validate("",
+			valis.When(Never, is.Zero).
+				ElseWhen(valis.When(Never, is.Zero).ElseIf(Never, is.In())).
+				Else(is.Required)),
+		"(required) is required",
+	)
+}
+
 func TestEach(t *testing.T) {
 	assert := assert.New(t)
 

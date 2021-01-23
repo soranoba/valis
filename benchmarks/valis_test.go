@@ -1,11 +1,11 @@
 package benchmarks
 
 import (
-	"github.com/soranoba/valis/is"
-	valistag "github.com/soranoba/valis/tag"
 	"testing"
 
 	"github.com/soranoba/valis"
+	"github.com/soranoba/valis/is"
+	valistag "github.com/soranoba/valis/tag"
 )
 
 func BenchmarkValis_SimpleStruct_tag(b *testing.B) {
@@ -15,12 +15,12 @@ func BenchmarkValis_SimpleStruct_tag(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		s := &Simple{}
-		if err := v.Validate(s, valistag.Validate); err == nil {
+		if err := v.Validate(s, valis.EachFields(valistag.Validate)); err == nil {
 			panic("invalid results")
 		}
 
 		s = &Simple{FirstName: "123456789012345678901", LastName: "123456789012345678901"}
-		if err := v.Validate(s, valistag.Validate); err == nil {
+		if err := v.Validate(s, valis.EachFields(valistag.Validate)); err == nil {
 			panic("invalid results")
 		}
 	}
