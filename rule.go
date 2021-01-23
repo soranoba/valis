@@ -7,7 +7,6 @@ import (
 
 type (
 	// Rule is an interface where verification contents are defined.
-	// Needs to define it in Public member variables so that you can refer to the value of the parameter using text/template package.
 	Rule interface {
 		Validate(validator *Validator, value interface{})
 	}
@@ -31,7 +30,8 @@ type (
 )
 
 var (
-	// ValidatableRule is a rule that executes Validate methods if the value implements Validatable or ValidatableWithValidator at verifying.
+	// ValidatableRule is a rule that delegates to Validate methods when verifying.
+	// See also Validatable and ValidatableWithValidator.
 	ValidatableRule Rule = &validatableRule{}
 )
 

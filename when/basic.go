@@ -1,16 +1,17 @@
+// The package implements some valis.WhenRule.
 package when
 
 import (
-	valishelpers "github.com/soranoba/valis/helpers"
 	"reflect"
 
 	"github.com/soranoba/valis"
+	valishelpers "github.com/soranoba/valis/helpers"
 )
 
-// IsType returns a new rule that verifies the value meets the rules when the type of the value and the ty are the same.
-func IsType(ty reflect.Type, rules ...valis.Rule) valis.Rule {
+// Returns a valis.WhenRule that verifies the value meets the rules when the type of the validating value has the same type.
+func IsType(ty reflect.Type, rules ...valis.Rule) *valis.WhenRule {
 	if ty == nil {
-		panic("invalid ty")
+		panic("invalid type")
 	}
 	cond := func(value interface{}) bool {
 		val := reflect.ValueOf(value)
@@ -22,10 +23,10 @@ func IsType(ty reflect.Type, rules ...valis.Rule) valis.Rule {
 	return valis.When(cond, rules...)
 }
 
-// IsTypeOrPtr returns a new rule that verifies the value meets the rules when the type of the value is ty or pointer of ty.
-func IsTypeOrPtr(ty reflect.Type, rules ...valis.Rule) valis.Rule {
+// Returns a valis.WhenRule that verifies the value meets the rules when the type of the validating value has the same type or pointer type.
+func IsTypeOrPtr(ty reflect.Type, rules ...valis.Rule) *valis.WhenRule {
 	if ty == nil {
-		panic("invalid ty")
+		panic("invalid type")
 	}
 	cond := func(value interface{}) bool {
 		val := reflect.ValueOf(value)
@@ -37,10 +38,10 @@ func IsTypeOrPtr(ty reflect.Type, rules ...valis.Rule) valis.Rule {
 	return valis.When(cond, rules...)
 }
 
-// IsTypeOrPtr returns a new rule that verifies the value meets the rules when the type of the value is ty or elem of ty.
-func IsTypeOrElem(ty reflect.Type, rules ...valis.Rule) valis.WhenRule {
+// Returns a valis.WhenRule that verifies the value meets the rules when the type of the validating value has the same type or elem type.
+func IsTypeOrElem(ty reflect.Type, rules ...valis.Rule) *valis.WhenRule {
 	if ty == nil {
-		panic("invalid ty")
+		panic("invalid type")
 	}
 	cond := func(value interface{}) bool {
 		val := reflect.ValueOf(value)
@@ -52,7 +53,7 @@ func IsTypeOrElem(ty reflect.Type, rules ...valis.Rule) valis.WhenRule {
 	return valis.When(cond, rules...)
 }
 
-// IsNumeric returns a new valis.WhenRule that verifies the value meets the rules when the value is numeric.
-func IsNumeric(rules ...valis.Rule) valis.WhenRule {
+// Returns a valis.WhenRule that verifies the value meets the rules when the value is numeric.
+func IsNumeric(rules ...valis.Rule) *valis.WhenRule {
 	return valis.When(valishelpers.IsNumeric, rules...)
 }

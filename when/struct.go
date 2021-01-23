@@ -5,7 +5,8 @@ import (
 	"reflect"
 )
 
-func IsStruct(rules ...valis.Rule) valis.Rule {
+// Returns a valis.WhenRule that verifies the value meets the rules when the value is struct.
+func IsStruct(rules ...valis.Rule) *valis.WhenRule {
 	cond := func(value interface{}) bool {
 		val := reflect.ValueOf(value)
 		for val.Kind() == reflect.Ptr {

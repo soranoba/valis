@@ -1,3 +1,4 @@
+// The package implements some valis.Rule related to field tag.
 package valistag
 
 import (
@@ -11,17 +12,14 @@ import (
 )
 
 var (
-	// Required is the `required` tag rule.
-	//   - `required:"${flag}"`: When flag is true, the value must be not empty.
+	// Required is a `required` tag rule.
 	Required = valis.NewFieldTagRule("required", requiredRules)
-	//   - `required`: equiv to is.Required
-	//   - `max=${max}`: equiv to is.LengthBetween(0, max) when string, otherwise equiv to is.LenBetween(0, max)
-	//   - `min=${min}`:
+	// Validate is a `validate` tag rule.
 	Validate = valis.NewFieldTagRule("validate", validateRules)
 )
 
 var (
-	validateTagSubKeys = map[string]valis.FieldTagRuleFunc{
+	validateTagSubKeys = map[string]func(string) ([]valis.Rule, error){
 		"required": func(v string) ([]valis.Rule, error) { // required
 			return []valis.Rule{is.Required}, nil
 		},

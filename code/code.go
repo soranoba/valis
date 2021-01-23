@@ -1,26 +1,29 @@
+// The package define error codes.
 package code
 
-// type error.
+// Type error codes.
 const (
-	NotString     = "not_string"
-	NotStruct     = "not_struct"
-	NotArray      = "not_array"
-	NotMap        = "not_map"
-	NotNumeric    = "not_numeric"
-	NotIterable   = "not_iterable"
-	NotAssignable = "not_assignable" // %[1]s = TypeName
+	NotString      = "not_string"
+	NotStruct      = "not_struct"
+	NotStructField = "not_struct_field"
+	NotArray       = "not_array"
+	NotMap         = "not_map"
+	NotNumeric     = "not_numeric"
+	NotIterable    = "not_iterable"
+	NotAssignable  = "not_assignable" // %[1]s = TypeName
 )
 
-// not found error.
+// Not found error codes.
 const (
 	NoKey = "no_key" // %[1]v = Key
 )
 
-// convert error.
+// Conversion error codes.
 const (
 	ConversionFailed = "conversion" // %[1]w = Error
 )
 
+// Validation error codes.
 const (
 	Custom             = "custom" // %[1]w = Error
 	Invalid            = "invalid"

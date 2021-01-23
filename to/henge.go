@@ -1,3 +1,4 @@
+// The package implements some valis.CombinationRule that verifies the converted value.
 package to
 
 import (
@@ -25,14 +26,6 @@ var (
 	Float valis.CombinationRule = NewCombinationRule(WrapHengeResultFunc(toFloatFunc))
 	// Map is a valis.CombinationRule that validates after the value convert to map[interface{}]interface{}.
 	Map valis.CombinationRule = NewCombinationRule(WrapHengeResultFunc(toMapFunc))
-	// StringSlice is a valis.CombinationRule that validates after the value convert to []string.
-	StringSlice valis.CombinationRule = NewCombinationRule(WrapHengeResultFunc(toStringSliceFunc))
-	// IntSlice is a valis.CombinationRule that validates after the value convert to []int64.
-	IntSlice valis.CombinationRule = NewCombinationRule(WrapHengeResultFunc(toIntSliceFunc))
-	// UintSlice is a valis.CombinationRule that validates after the value convert to []uint64.
-	UintSlice valis.CombinationRule = NewCombinationRule(WrapHengeResultFunc(toUintSliceFunc))
-	// FloatSlice is a valis.CombinationRule that validates after the value convert to []float64.
-	FloatSlice valis.CombinationRule = NewCombinationRule(WrapHengeResultFunc(toFloatSliceFunc))
 )
 
 func (e *hengeError) Error() string {
@@ -57,7 +50,7 @@ func NewCombinationRule(convertFunc valis.ConvertFunc) valis.CombinationRule {
 }
 
 // WrapHengeResultFunc is a higher-order function that wraps errors of henge framework to readable errors on valis.
-func WrapHengeResultFunc(f func(interface{}) (interface{}, error)) func(interface{}) (interface{}, error) {
+func WrapHengeResultFunc(f valis.ConvertFunc) valis.ConvertFunc {
 	return func(value interface{}) (interface{}, error) {
 		val, err := f(value)
 		var convertErr *henge.ConvertError
@@ -86,20 +79,4 @@ func toFloatFunc(value interface{}) (interface{}, error) {
 
 func toMapFunc(value interface{}) (interface{}, error) {
 	return henge.New(value).Map().Result()
-}
-
-func toStringSliceFunc(value interface{}) (interface{}, error) {
-	return henge.New(value).StringSlice().Result()
-}
-
-func toIntSliceFunc(value interface{}) (interface{}, error) {
-	return henge.New(value).IntSlice().Result()
-}
-
-func toUintSliceFunc(value interface{}) (interface{}, error) {
-	return henge.New(value).UintSlice().Result()
-}
-
-func toFloatSliceFunc(value interface{}) (interface{}, error) {
-	return henge.New(value).FloatSlice().Result()
 }

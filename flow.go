@@ -6,10 +6,9 @@ import (
 )
 
 type (
-	// WhenRule is a rule that has any condition.
-	WhenRule = *whenRule
-	// ConditionFunc is a condition function.
-	ConditionFunc func(interface{}) bool
+	WhenRule struct {
+		condAndRules []*condAndRule
+	}
 )
 
 type (
@@ -20,11 +19,8 @@ type (
 		rules []Rule
 	}
 	condAndRule struct {
-		cond  ConditionFunc
+		cond  func(interface{}) bool
 		rules []Rule
-	}
-	whenRule struct {
-		condAndRules []*condAndRule
 	}
 	eachRule struct {
 		rules []Rule
@@ -35,6 +31,7 @@ type (
 )
 
 // And returns a new rule that verifies the value meets the rules and all common rules.
+// Should only use it in your own rules, because to avoid validating common rules multiple times.
 func And(rules ...Rule) Rule {
 	return &andRule{rules: rules}
 }
@@ -69,32 +66,34 @@ func (r *orRule) Validate(validator *Validator, value interface{}) {
 }
 
 // If is equiv to When
-func If(cond ConditionFunc, rules ...Rule) WhenRule {
+func If(cond func(interface{}) bool, rules ...Rule) *WhenRule {
 	return When(cond, rules...)
 }
 
-// When returns a WhenRule that verified the value meets the rules and all common rules when cond returns true.
-func When(cond ConditionFunc, rules ...Rule) WhenRule {
-	return &whenRule{condAndRules: []*condAndRule{{cond: cond, rules: rules}}}
+// When returns a new Rule verify the value meets the rules when cond returns true.
+func When(cond func(interface{}) bool, rules ...Rule) *WhenRule {
+	return &WhenRule{condAndRules: []*condAndRule{{cond: cond, rules: rules}}}
 }
 
-func (r *whenRule) ElseWhen(rule WhenRule) WhenRule {
+// ElseWhen set the WhenRule that verified when all before conditions, and returns self.
+func (r *WhenRule) ElseWhen(rule *WhenRule) *WhenRule {
 	r.condAndRules = append(r.condAndRules, rule.condAndRules...)
 	return r
 }
 
-// ElseIf set the rules that verified when all before conditions return false and cond returns true.
-func (r *whenRule) ElseIf(cond ConditionFunc, rules ...Rule) WhenRule {
+// ElseIf set some Rule verified when all before conditions return false and cond returns true. And it returns self.
+func (r *WhenRule) ElseIf(cond func(interface{}) bool, rules ...Rule) *WhenRule {
 	r.condAndRules = append(r.condAndRules, &condAndRule{cond: cond, rules: rules})
 	return r
 }
 
-// Else set the rules that verified when all conditions return false.
-func (r *whenRule) Else(rules ...Rule) Rule {
+// Else set the rules verified when all conditions return false, and returns self.
+func (r WhenRule) Else(rules ...Rule) Rule {
 	return r.ElseIf(func(interface{}) bool { return true }, rules...)
 }
 
-func (r *whenRule) Validate(validator *Validator, value interface{}) {
+// See Rule.Validate
+func (r WhenRule) Validate(validator *Validator, value interface{}) {
 	for _, condAndRule := range r.condAndRules {
 		if condAndRule.cond(value) {
 			for _, rule := range condAndRule.rules {
@@ -126,32 +125,5 @@ func (rule *eachRule) Validate(validator *Validator, value interface{}) {
 		}
 	default:
 		validator.ErrorCollector().Add(validator.Location(), NewError(code.NotArray, value))
-	}
-}
-
-func EachFields(rules ...Rule) Rule {
-	return &eachFieldsRule{rules: rules}
-}
-
-func (rule *eachFieldsRule) Validate(validator *Validator, value interface{}) {
-	val := reflect.ValueOf(value)
-	for val.Kind() == reflect.Ptr {
-		val = val.Elem()
-	}
-
-	switch val.Kind() {
-	case reflect.Struct:
-		for i := 0; i < val.NumField(); i++ {
-			fieldVal := val.Field(i)
-			if !fieldVal.IsValid() {
-				return
-			}
-			field := val.Type().Field(i)
-			validator.DiveField(&field, func(v *Validator) {
-				And(rule.rules...).Validate(v, fieldVal.Interface())
-			})
-		}
-	default:
-		validator.ErrorCollector().Add(validator.Location(), NewError(code.NotStruct, value))
 	}
 }

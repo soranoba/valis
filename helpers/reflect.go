@@ -1,3 +1,4 @@
+// The package provides utilities.
 package valishelpers
 
 import (
@@ -33,6 +34,7 @@ func GetField(structPointer interface{}, fieldPointer interface{}) *reflect.Stru
 	panic("invalid fieldPointer")
 }
 
+// IsNumeric returns true if v is numeric type. Otherwise, it returns false.
 func IsNumeric(v interface{}) bool {
 	val := reflect.ValueOf(v)
 	switch val.Kind() {

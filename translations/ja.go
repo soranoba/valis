@@ -11,8 +11,9 @@ func DefaultJapanese(c *catalog.Builder) {
 	tag := language.Japanese
 
 	// type error
-	c.Set(tag, code.NotString, catalog.String("must be a string"))
+	c.Set(tag, code.NotString, catalog.String("must be any string"))
 	c.Set(tag, code.NotStruct, catalog.String("must be any struct"))
+	c.Set(tag, code.NotStructField, catalog.String("must be any struct field"))
 	c.Set(tag, code.NotArray, catalog.String("must be any array"))
 	c.Set(tag, code.NotMap, catalog.String("must be any map"))
 	c.Set(tag, code.NotAssignable, catalog.String("can't assign to %[1]s"))

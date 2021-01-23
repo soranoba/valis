@@ -18,6 +18,7 @@ type (
 	}
 )
 
+// Key returns a new rule that verifies the value of the key meets the rules and all common rules.
 func Key(key interface{}, rules ...Rule) Rule {
 	if !reflect.ValueOf(key).IsValid() {
 		panic("key is an invalid value")
@@ -52,6 +53,7 @@ func (rule *keyRule) Validate(validator *Validator, value interface{}) {
 	}
 }
 
+// EachKeys returns a new rule that verifies all keys of the map meet the rules and all common rules.
 func EachKeys(rules ...Rule) Rule {
 	return &eachKeyRule{rules: rules}
 }
@@ -75,6 +77,7 @@ func (rule *eachKeyRule) Validate(validator *Validator, value interface{}) {
 	}
 }
 
+// EachValues returns a new rule that verifies all values of the map meet the rules and all common rules.
 func EachValues(rules ...Rule) Rule {
 	return &eachValueRule{rules: rules}
 }

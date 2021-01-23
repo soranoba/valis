@@ -36,12 +36,16 @@ func TestTranslations(t *testing.T) {
 
 	data := []*Data{
 		f(code.NotString)(Results{
-			en: "must be a string",
-			ja: "must be a string",
+			en: "must be any string",
+			ja: "must be any string",
 		}),
 		f(code.NotStruct)(Results{
 			en: "must be any struct",
 			ja: "must be any struct",
+		}),
+		f(code.NotStructField)(Results{
+			en: "must be any struct field",
+			ja: "must be any struct field",
 		}),
 		f(code.NotArray)(Results{
 			en: "must be any array",

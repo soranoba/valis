@@ -13,12 +13,12 @@ type (
 	}
 	toRuleErrorCollector struct {
 		ErrorCollector
-		loc   Location
+		loc   *Location
 		value interface{}
 	}
 )
 
-// To returns a new rule that verifies the converted value met all rules.
+// Returns a new rule that verifies the converted value met all rules and all common rules.
 func To(convertFunc ConvertFunc, rules ...Rule) Rule {
 	return &toRule{convertFunc: convertFunc, rules: rules}
 }
@@ -35,11 +35,11 @@ func (rule *toRule) Validate(validator *Validator, value interface{}) {
 	And(rule.rules...).Validate(newValidator, newValue)
 }
 
-func newToRuleErrorCollector(errorCollector ErrorCollector, location Location, value interface{}) ErrorCollector {
+func newToRuleErrorCollector(errorCollector ErrorCollector, location *Location, value interface{}) ErrorCollector {
 	return &toRuleErrorCollector{ErrorCollector: errorCollector, loc: location, value: value}
 }
 
-func (c *toRuleErrorCollector) Add(loc Location, err Error) {
+func (c *toRuleErrorCollector) Add(loc *Location, err Error) {
 	if loc == c.loc {
 		newDetail := *err
 		newDetail.valueBeforeConversion = c.value

@@ -20,13 +20,13 @@ type (
 
 	LocationError struct {
 		Error
-		Location Location
+		Location *Location
 	}
 
 	// ErrorCollector is an interface that receives some Error of each rule and creates the error returned by Validator.Validate.
 	ErrorCollector interface {
 		HasError() bool
-		Add(loc Location, err Error)
+		Add(loc *Location, err Error)
 		MakeError() error
 	}
 	ErrorCollectorFactoryFunc func() ErrorCollector
@@ -103,7 +103,7 @@ func (c *standardErrorCollector) HasError() bool {
 	return len(c.errors) > 0
 }
 
-func (c *standardErrorCollector) Add(loc Location, err Error) {
+func (c *standardErrorCollector) Add(loc *Location, err Error) {
 	c.errors = append(c.errors, &LocationError{
 		Location: loc,
 		Error:    err,

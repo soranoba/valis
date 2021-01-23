@@ -187,7 +187,7 @@ func TestLengthBetween(t *testing.T) {
 	)
 	assert.EqualError(
 		valis.Validate(0, is.LengthBetween(0, 10)),
-		"(not_string) must be a string",
+		"(not_string) must be any string",
 	)
 	assert.NoError(valis.Validate("🍣🍺🍣", is.LengthBetween(3, 3)))
 }

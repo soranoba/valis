@@ -8,45 +8,21 @@ import (
 )
 
 type (
-	// LocationKind is the type of Location
+	// LocationKind is the type of Location.
 	LocationKind int
-	// Location is the interface of the private struct that indicates the location of the value.
-	// Should not define your own Location struct.
-	Location interface {
-		// Kind returns a LocationKind of the Location.
-		Kind() LocationKind
-		// Parent returns a parent location, when it is not LocationKindRoot. Otherwise, it returns nil.
-		Parent() Location
-
-		// Field returns a reflect.StructField when it is LocationKindField. Otherwise, it panic.
-		Field() *reflect.StructField
-		// Index returns a Index when it is LocationKindIndex. Otherwise, it panic.
-		Index() int
-		// Key returns a Key when it is LocationKindMapKey or LocationKindMapValue. Otherwise, it panic.
-		Key() interface{}
-
-		// FieldLocation returns a new Location.
-		FieldLocation(field *reflect.StructField) Location
-		// IndexLocation returns a new Location.
-		IndexLocation(index int) Location
-		// MapKeyLocation returns a new Location.
-		MapKeyLocation(key interface{}) Location
-		// MapValueLocation returns a new Location.
-		MapValueLocation(key interface{}) Location
+	// Location indicates the location of the validating value.
+	Location struct {
+		parent *Location
+		kind   LocationKind
+		value  interface{}
 	}
 	// LocationNameResolver is an interface that creates a string corresponding to Location.
 	LocationNameResolver interface {
-		ResolveLocationName(loc Location) string
+		ResolveLocationName(loc *Location) string
 	}
 )
 
 type (
-	location struct {
-		parent Location
-		kind   LocationKind
-		value  interface{}
-	}
-
 	defaultLocationNameResolver struct {
 	}
 	jsonLocationNameResolver struct {
@@ -77,36 +53,41 @@ var (
 	RequestLocationNameResolver LocationNameResolver = &requestLocationNameResolver{}
 )
 
-func NewLocation() Location {
-	return &location{}
+func newRootLocation() *Location {
+	return &Location{}
 }
 
-func (loc *location) Kind() LocationKind {
+// Kind returns a LocationKind of the Location.
+func (loc *Location) Kind() LocationKind {
 	return loc.kind
 }
 
-func (loc *location) Parent() Location {
+// Parent returns a parent location, when the Kind is not LocationKindRoot. Otherwise, occur panics.
+func (loc *Location) Parent() *Location {
 	if loc.kind == LocationKindRoot {
 		panic("Kind must be LocationKindRoot")
 	}
 	return loc.parent
 }
 
-func (loc *location) Field() *reflect.StructField {
+// Field returns a reflect.StructField when the Kind is LocationKindField. Otherwise, occur panics.
+func (loc *Location) Field() *reflect.StructField {
 	if loc.kind != LocationKindField {
 		panic("Kind must be LocationKindField")
 	}
 	return loc.value.(*reflect.StructField)
 }
 
-func (loc *location) Index() int {
+// Index returns a Index when the Kind is LocationKindIndex. Otherwise, occur panics.
+func (loc *Location) Index() int {
 	if loc.kind != LocationKindIndex {
 		panic("Kind must be LocationKindIndex")
 	}
 	return loc.value.(int)
 }
 
-func (loc *location) Key() interface{} {
+// Key returns a Key when the Kind is LocationKindMapKey or LocationKindMapValue. Otherwise, occur panics.
+func (loc *Location) Key() interface{} {
 	switch loc.kind {
 	case LocationKindMapKey, LocationKindMapValue:
 		return loc.value
@@ -115,39 +96,43 @@ func (loc *location) Key() interface{} {
 	}
 }
 
-func (loc *location) FieldLocation(field *reflect.StructField) Location {
-	return &location{
+// FieldLocation returns a new Location that indicates the value at the field in the struct.
+func (loc *Location) FieldLocation(field *reflect.StructField) *Location {
+	return &Location{
 		parent: loc,
 		kind:   LocationKindField,
 		value:  field,
 	}
 }
 
-func (loc *location) IndexLocation(index int) Location {
-	return &location{
+// IndexLocation returns a new Location that indicates the value at the index in the array or slice.
+func (loc *Location) IndexLocation(index int) *Location {
+	return &Location{
 		parent: loc,
 		kind:   LocationKindIndex,
 		value:  index,
 	}
 }
 
-func (loc *location) MapKeyLocation(key interface{}) Location {
-	return &location{
+// MapKeyLocation returns a new Location that indicates the key.
+func (loc *Location) MapKeyLocation(key interface{}) *Location {
+	return &Location{
 		parent: loc,
 		kind:   LocationKindMapKey,
 		value:  key,
 	}
 }
 
-func (loc *location) MapValueLocation(key interface{}) Location {
-	return &location{
+// MapValueLocation returns a new Location that indicates the value of the key.
+func (loc *Location) MapValueLocation(key interface{}) *Location {
+	return &Location{
 		parent: loc,
 		kind:   LocationKindMapValue,
 		value:  key,
 	}
 }
 
-func (r *defaultLocationNameResolver) ResolveLocationName(loc Location) string {
+func (r *defaultLocationNameResolver) ResolveLocationName(loc *Location) string {
 	switch loc.Kind() {
 	case LocationKindRoot:
 		return ""
@@ -164,7 +149,7 @@ func (r *defaultLocationNameResolver) ResolveLocationName(loc Location) string {
 	}
 }
 
-func (r *jsonLocationNameResolver) ResolveLocationName(loc Location) string {
+func (r *jsonLocationNameResolver) ResolveLocationName(loc *Location) string {
 	switch loc.Kind() {
 	case LocationKindRoot:
 		return ""
@@ -189,7 +174,7 @@ func (r *jsonLocationNameResolver) ResolveLocationName(loc Location) string {
 	}
 }
 
-func (r *requestLocationNameResolver) ResolveLocationName(loc Location) string {
+func (r *requestLocationNameResolver) ResolveLocationName(loc *Location) string {
 	switch loc.Kind() {
 	case LocationKindRoot:
 		return ""

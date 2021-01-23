@@ -9,7 +9,7 @@ type (
 		commonRules               []Rule
 		errorCollectorFactoryFunc ErrorCollectorFactoryFunc
 
-		loc            Location
+		loc            *Location
 		errorCollector ErrorCollector
 	}
 	// CloneOpts is an option of Clone.
@@ -19,7 +19,7 @@ type (
 		// When InheritErrorCollector is true, Clone keeps the ErrorCollector.
 		InheritErrorCollector bool
 		// When Location is not nil and InheritLocation is false, Clone set the Location to the new Validator.
-		Location Location
+		Location *Location
 		// When ErrorCollector is not nil and InheritErrorCollector is false, Clone set the ErrorCollector to the new Validator.
 		ErrorCollector ErrorCollector
 	}
@@ -31,7 +31,7 @@ func NewValidator() *Validator {
 		errorCollectorFactoryFunc: func() ErrorCollector {
 			return NewStandardErrorCollector(DefaultLocationNameResolver)
 		},
-		loc: NewLocation(),
+		loc: newRootLocation(),
 	}
 	return v
 }
@@ -63,14 +63,14 @@ func (v *Validator) Clone(opts *CloneOpts) *Validator {
 		if opts.Location != nil {
 			newValidator.loc = opts.Location
 		} else {
-			newValidator.loc = NewLocation()
+			newValidator.loc = newRootLocation()
 		}
 	}
 	return &newValidator
 }
 
 // Location returns a current location.
-func (v *Validator) Location() Location {
+func (v *Validator) Location() *Location {
 	return v.loc
 }
 

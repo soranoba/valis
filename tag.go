@@ -2,32 +2,30 @@ package valis
 
 import (
 	"fmt"
+	"github.com/soranoba/valis/code"
 	"reflect"
 	"sync"
 )
 
 type (
-	FieldTagRule     *fieldTagRule
-	FieldTagRuleFunc func(tagValue string) ([]Rule, error)
-)
-
-type (
 	fieldTagRule struct {
-		key      string
-		ruleFunc FieldTagRuleFunc
-		lock     *sync.RWMutex
-		cache    map[reflect.StructTag][]Rule
+		key             string
+		ruleFactoryFunc func(tagValue string) ([]Rule, error)
+		lock            *sync.RWMutex
+		cache           map[reflect.StructTag][]Rule
 	}
 )
 
-// NewFieldTagRule returns a new rule, that call ruleFunc when it found any fields that have the tag.
-func NewFieldTagRule(key string, ruleFunc FieldTagRuleFunc) *fieldTagRule {
-	return &fieldTagRule{key: key, ruleFunc: ruleFunc, lock: &sync.RWMutex{}, cache: map[reflect.StructTag][]Rule{}}
+// NewFieldTagRule returns a new rule related to the field tag.
+// The rule verifies the value when it is a field value and has the specified tag.
+func NewFieldTagRule(key string, ruleFactoryFunc func(tagValue string) ([]Rule, error)) *fieldTagRule {
+	return &fieldTagRule{key: key, ruleFactoryFunc: ruleFactoryFunc, lock: &sync.RWMutex{}, cache: map[reflect.StructTag][]Rule{}}
 }
 
 func (r *fieldTagRule) Validate(validator *Validator, value interface{}) {
 	loc := validator.Location()
 	if loc.Kind() != LocationKindField {
+		validator.ErrorCollector().Add(loc, NewError(code.NotStruct, value))
 		return
 	}
 
@@ -39,7 +37,7 @@ func (r *fieldTagRule) Validate(validator *Validator, value interface{}) {
 	if !ok {
 		if tag, ok := field.Tag.Lookup(r.key); ok {
 			var err error
-			rules, err = r.ruleFunc(tag)
+			rules, err = r.ruleFactoryFunc(tag)
 			if err != nil {
 				panic(fmt.Sprintf("%s (key = %s, path = %s)", err.Error(), r.key, field.PkgPath))
 			}

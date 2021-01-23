@@ -1,3 +1,4 @@
+// The package provides for translations.
 package translations
 
 import (
@@ -15,7 +16,7 @@ type (
 
 var (
 	// AllPredefinedCatalogRegistrationFunc is all catalog registration functions predefined by this library.
-	AllPredefinedCatalogRegistrationFunc = []CatalogRegistrationFunc{
+	AllPredefinedCatalogRegistrationFunc = [...]CatalogRegistrationFunc{
 		DefaultEnglish,
 		DefaultJapanese,
 	}
