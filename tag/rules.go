@@ -9,29 +9,43 @@ import (
 	"github.com/soranoba/valis/when"
 	"math"
 	"reflect"
-	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 type (
-	oneofRule struct {
+	ValidateTagHandler struct{}
+)
+
+type (
+	requiredTagHandler struct{}
+	formatTagHandler   struct{}
+	oneofRule          struct {
 		elems []string
 	}
 )
 
 var (
 	// Required is a `required` tag rule.
-	Required = valis.NewFieldTagRule("required", requiredRules)
+	// See also is.Required rule.
+	//
+	// For example,
+	//   `required:"true"`
+	//
+	Required = valis.NewFieldTagRule("required", &requiredTagHandler{})
+	// Format is a `format` tag rule.
+	// See also is.MatchString rule.
+	//
+	// For example,
+	//   `format:"^[0-9]+$"`
+	//   `format:"^\\d+$"`
+	//
+	Format = valis.NewFieldTagRule("format", &formatTagHandler{})
 	// Validate is a `validate` tag rule.
-	Validate = valis.NewFieldTagRule("validate", validateRules)
+	Validate = valis.NewFieldTagRule("validate", &ValidateTagHandler{})
 )
 
 var (
-	regexpCache     = map[string]*regexp.Regexp{}
-	regexpCacheLock sync.RWMutex
-
 	validateTagSubKeys = map[string]func(string) ([]valis.Rule, error){
 		"required": func(v string) ([]valis.Rule, error) { // required
 			return []valis.Rule{is.Required}, nil
@@ -93,27 +107,10 @@ var (
 			elems := strings.Split(v, " ")
 			return []valis.Rule{&oneofRule{elems: elems}}, nil
 		},
-		"regexp": func(v string) ([]valis.Rule, error) { // regexp=^[0-9]+$
-			if v == "" {
-				return nil, errInsufficientNumberOfTagParameters
-			}
-
-			regexpCacheLock.RLock()
-			re, ok := regexpCache[v]
-			regexpCacheLock.RUnlock()
-
-			if !ok {
-				re = regexp.MustCompile(v)
-				regexpCacheLock.Lock()
-				regexpCache[v] = re
-				regexpCacheLock.Unlock()
-			}
-			return []valis.Rule{is.Match(re)}, nil
-		},
 	}
 )
 
-func requiredRules(tagValue string) ([]valis.Rule, error) {
+func (h *requiredTagHandler) ParseTagValue(tagValue string) ([]valis.Rule, error) {
 	ok, _ := strconv.ParseBool(tagValue)
 	if ok {
 		return []valis.Rule{is.Required}, nil
@@ -121,7 +118,7 @@ func requiredRules(tagValue string) ([]valis.Rule, error) {
 	return []valis.Rule{}, nil
 }
 
-func validateRules(tagValue string) ([]valis.Rule, error) {
+func (h *ValidateTagHandler) ParseTagValue(tagValue string) ([]valis.Rule, error) {
 	elems := strings.Split(tagValue, ",")
 	rules := make([]valis.Rule, 0)
 
@@ -144,6 +141,13 @@ func validateRules(tagValue string) ([]valis.Rule, error) {
 		}
 	}
 	return rules, nil
+}
+
+func (h *formatTagHandler) ParseTagValue(tagValue string) ([]valis.Rule, error) {
+	if tagValue == "" {
+		return nil, errInsufficientNumberOfTagParameters
+	}
+	return []valis.Rule{is.MatchString(tagValue)}, nil
 }
 
 func (rule *oneofRule) Validate(validator *valis.Validator, value interface{}) {

@@ -8,18 +8,26 @@ import (
 )
 
 type (
+	// FieldTagHandler is an interface to be registered in FieldTagRule.
+	// It has a role in creating a Rule from the TagValue.
+	FieldTagHandler interface {
+		ParseTagValue(tagValue string) ([]Rule, error)
+	}
+)
+
+type (
 	fieldTagRule struct {
-		key             string
-		ruleFactoryFunc func(tagValue string) ([]Rule, error)
-		lock            *sync.RWMutex
-		cache           map[string][]Rule
+		key        string
+		tagHandler FieldTagHandler
+		lock       *sync.RWMutex
+		cache      map[string][]Rule
 	}
 )
 
 // NewFieldTagRule returns a new rule related to the field tag.
 // The rule verifies the value when it is a field value and has the specified tag.
-func NewFieldTagRule(key string, ruleFactoryFunc func(tagValue string) ([]Rule, error)) *fieldTagRule {
-	return &fieldTagRule{key: key, ruleFactoryFunc: ruleFactoryFunc, lock: &sync.RWMutex{}, cache: map[string][]Rule{}}
+func NewFieldTagRule(key string, tagHandler FieldTagHandler) *fieldTagRule {
+	return &fieldTagRule{key: key, tagHandler: tagHandler, lock: &sync.RWMutex{}, cache: map[string][]Rule{}}
 }
 
 func (r *fieldTagRule) Validate(validator *Validator, value interface{}) {
@@ -41,7 +49,7 @@ func (r *fieldTagRule) Validate(validator *Validator, value interface{}) {
 
 	if !ok {
 		var err error
-		rules, err = r.ruleFactoryFunc(tag)
+		rules, err = r.tagHandler.ParseTagValue(tag)
 		if err != nil {
 			panic(fmt.Sprintf("%s (key = %s, path = %s)", err.Error(), r.key, field.PkgPath))
 		}

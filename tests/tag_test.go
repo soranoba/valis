@@ -8,6 +8,16 @@ import (
 	"testing"
 )
 
+type TagValueHandler struct {
+}
+
+func (h *TagValueHandler) ParseTagValue(tagValue string) ([]valis.Rule, error) {
+	if tagValue == "true" {
+		return []valis.Rule{is.Required}, nil
+	}
+	return nil, errors.New("invalid required tag")
+}
+
 func TestFieldTagRule(t *testing.T) {
 	assert := assert.New(t)
 
@@ -17,12 +27,7 @@ func TestFieldTagRule(t *testing.T) {
 	}
 
 	u := User{}
-	requiredTagRule := valis.NewFieldTagRule("required", func(tagValue string) ([]valis.Rule, error) {
-		if tagValue == "true" {
-			return []valis.Rule{is.Required}, nil
-		}
-		return nil, errors.New("invalid required tag")
-	})
+	requiredTagRule := valis.NewFieldTagRule("required", &TagValueHandler{})
 
 	assert.EqualError(
 		v.Validate(&u, requiredTagRule),

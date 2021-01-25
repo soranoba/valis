@@ -7,6 +7,16 @@ import (
 	"github.com/soranoba/valis/is"
 )
 
+type TagValueHandler struct {
+}
+
+func (h *TagValueHandler) ParseTagValue(tagValue string) ([]valis.Rule, error) {
+	if tagValue == "true" {
+		return []valis.Rule{is.Required}, nil
+	}
+	return nil, errors.New("invalid required tag")
+}
+
 func ExampleNewFieldTagRule() {
 	type User struct {
 		Name string `required:"true"`
@@ -15,12 +25,7 @@ func ExampleNewFieldTagRule() {
 
 	v := valis.NewValidator()
 	u := User{}
-	requiredTagRule := valis.NewFieldTagRule("required", func(tagValue string) ([]valis.Rule, error) {
-		if tagValue == "true" {
-			return []valis.Rule{is.Required}, nil
-		}
-		return nil, errors.New("invalid required tag")
-	})
+	requiredTagRule := valis.NewFieldTagRule("required", &TagValueHandler{})
 
 	if err := v.Validate(
 		&u,

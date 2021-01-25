@@ -35,6 +35,30 @@ func TestRequired(t *testing.T) {
 	)
 }
 
+func TestFormat(t *testing.T) {
+	assert := assert.New(t)
+
+	type User struct {
+		Name string `format:"^[a-z]+$"`
+	}
+
+	assert.EqualError(
+		v.Validate(&User{}, valis.EachFields(valistag.Format)),
+		"(regexp) .Name is a mismatch with the regular expression. (^[a-z]+$)",
+	)
+	assert.EqualError(
+		v.Validate(&User{
+			Name: "abc0123",
+		}, valis.EachFields(valistag.Format)),
+		"(regexp) .Name is a mismatch with the regular expression. (^[a-z]+$)",
+	)
+	assert.NoError(
+		v.Validate(&User{
+			Name: "abcdef",
+		}, valis.EachFields(valistag.Format)),
+	)
+}
+
 func TestValidate_required(t *testing.T) {
 	assert := assert.New(t)
 
@@ -129,30 +153,6 @@ func TestValidate_oneof(t *testing.T) {
 			U: 3,
 			B: true,
 			F: 3,
-		}, valis.EachFields(valistag.Validate)),
-	)
-}
-
-func TestValidate_regexp(t *testing.T) {
-	assert := assert.New(t)
-
-	type User struct {
-		Name string `validate:"regexp=^[a-z]+$"`
-	}
-
-	assert.EqualError(
-		v.Validate(&User{}, valis.EachFields(valistag.Validate)),
-		"(regexp) .Name is a mismatch with the regular expression. (^[a-z]+$)",
-	)
-	assert.EqualError(
-		v.Validate(&User{
-			Name: "abc0123",
-		}, valis.EachFields(valistag.Validate)),
-		"(regexp) .Name is a mismatch with the regular expression. (^[a-z]+$)",
-	)
-	assert.NoError(
-		v.Validate(&User{
-			Name: "abcdef",
 		}, valis.EachFields(valistag.Validate)),
 	)
 }
