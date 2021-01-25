@@ -89,4 +89,6 @@ func TestValidatableRule(t *testing.T) {
 	// NOTE: it will succeed if it does not implement Validatable
 	assert.NoError(v.Validate(struct{}{}, valis.ValidatableRule))
 	assert.NoError(v.Validate("", valis.ValidatableRule))
+	assert.NoError(v.Validate((*string)(nil), valis.ValidatableRule))
+	assert.NoError(v.Validate(nil, valis.ValidatableRule))
 }

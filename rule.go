@@ -37,22 +37,19 @@ var (
 
 func (rule *validatableRule) Validate(validator *Validator, value interface{}) {
 	val := reflect.ValueOf(value)
-	if !val.IsValid() {
-		return
-	}
-
 	for {
-		if val.CanInterface() {
-			if v, ok := val.Interface().(ValidatableWithValidator); ok {
-				v.Validate(validator)
-				return
+		if !(val.IsValid() && val.CanInterface()) {
+			return
+		}
+		if v, ok := val.Interface().(ValidatableWithValidator); ok {
+			v.Validate(validator)
+			return
+		}
+		if v, ok := val.Interface().(Validatable); ok {
+			if err := v.Validate(); err != nil {
+				validator.ErrorCollector().Add(validator.Location(), NewError(code.Custom, value, err))
 			}
-			if v, ok := val.Interface().(Validatable); ok {
-				if err := v.Validate(); err != nil {
-					validator.ErrorCollector().Add(validator.Location(), NewError(code.Custom, value, err))
-				}
-				return
-			}
+			return
 		}
 		if val.Kind() != reflect.Ptr {
 			break
