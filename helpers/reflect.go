@@ -1,4 +1,4 @@
-// The package provides utilities.
+// Package valishelpers provides utilities.
 package valishelpers
 
 import (

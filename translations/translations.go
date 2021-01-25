@@ -1,4 +1,4 @@
-// The package provides for translations.
+// Package translations provides for translations.
 package translations
 
 import (

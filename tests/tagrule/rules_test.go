@@ -1,8 +1,8 @@
-package tag_test
+package tagrule_test
 
 import (
 	"github.com/soranoba/valis"
-	valistag "github.com/soranoba/valis/tag"
+	"github.com/soranoba/valis/tagrule"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -26,12 +26,12 @@ func TestRequired(t *testing.T) {
 	}
 
 	assert.EqualError(
-		v.Validate(User{}, valis.EachFields(valistag.Required)),
+		v.Validate(User{}, valis.EachFields(tagrule.Required)),
 		"(required) .FirstName is required\n"+
 			"(required) .Age is required",
 	)
 	assert.NoError(
-		v.Validate(&User{FirstName: "Taro", LastName: "Soto", Age: 20}, valis.EachFields(valistag.Required)),
+		v.Validate(&User{FirstName: "Taro", LastName: "Soto", Age: 20}, valis.EachFields(tagrule.Required)),
 	)
 }
 
@@ -43,19 +43,19 @@ func TestFormat(t *testing.T) {
 	}
 
 	assert.EqualError(
-		v.Validate(&User{}, valis.EachFields(valistag.Format)),
+		v.Validate(&User{}, valis.EachFields(tagrule.Format)),
 		"(regexp) .Name is a mismatch with the regular expression. (^[a-z]+$)",
 	)
 	assert.EqualError(
 		v.Validate(&User{
 			Name: "abc0123",
-		}, valis.EachFields(valistag.Format)),
+		}, valis.EachFields(tagrule.Format)),
 		"(regexp) .Name is a mismatch with the regular expression. (^[a-z]+$)",
 	)
 	assert.NoError(
 		v.Validate(&User{
 			Name: "abcdef",
-		}, valis.EachFields(valistag.Format)),
+		}, valis.EachFields(tagrule.Format)),
 	)
 }
 
@@ -66,11 +66,11 @@ func TestValidate_required(t *testing.T) {
 		Name string `validate:"required"`
 	}
 	assert.EqualError(
-		v.Validate(User{}, valis.EachFields(valistag.Validate)),
+		v.Validate(User{}, valis.EachFields(tagrule.Validate)),
 		"(required) .Name is required",
 	)
 	assert.NoError(
-		v.Validate(&User{Name: "Alice"}, valis.EachFields(valistag.Validate)),
+		v.Validate(&User{Name: "Alice"}, valis.EachFields(tagrule.Validate)),
 	)
 }
 
@@ -87,7 +87,7 @@ func TestValidate_min(t *testing.T) {
 			Name:   "🍺",
 			Tags:   []string{""},
 			Params: map[string]string{"": ""},
-		}, valis.EachFields(valistag.Validate)),
+		}, valis.EachFields(tagrule.Validate)),
 		`(too_short_length) .Name is too short length (minimum is 2 characters)
 (too_short_len) .Tags is too few elements (minimum is 2 elements)
 (too_short_len) .Params is too few elements (minimum is 2 elements)`,
@@ -97,7 +97,7 @@ func TestValidate_min(t *testing.T) {
 			Name:   "Alice",
 			Tags:   []string{"", ""},
 			Params: map[string]string{"a": "", "b": ""},
-		}, valis.EachFields(valistag.Validate)),
+		}, valis.EachFields(tagrule.Validate)),
 	)
 }
 
@@ -114,7 +114,7 @@ func TestValidate_max(t *testing.T) {
 			Name:   "abc",
 			Tags:   []string{"a", "b", "c"},
 			Params: map[string]string{"a": "", "b": "", "c": ""},
-		}, valis.EachFields(valistag.Validate)),
+		}, valis.EachFields(tagrule.Validate)),
 		`(too_long_length) .Name is too long length (maximum is 2 characters)
 (too_long_len) .Tags is too many elements (maximum is 2 elements)
 (too_long_len) .Params is too many elements (maximum is 2 elements)`,
@@ -124,7 +124,7 @@ func TestValidate_max(t *testing.T) {
 			Name:   "🍺🍺",
 			Tags:   []string{"", ""},
 			Params: map[string]string{"a": "", "b": ""},
-		}, valis.EachFields(valistag.Validate)),
+		}, valis.EachFields(tagrule.Validate)),
 	)
 }
 
@@ -139,7 +139,7 @@ func TestValidate_oneof(t *testing.T) {
 		F float64 `validate:"oneof=1 2.5 3"`
 	}
 	assert.EqualError(
-		v.Validate(&Model{}, valis.EachFields(valistag.Validate)),
+		v.Validate(&Model{}, valis.EachFields(tagrule.Validate)),
 		`(inclusion) .S is not included in [a b c]
 (inclusion) .I is not included in [1 2 3]
 (inclusion) .U is not included in [1 2 3]
@@ -153,6 +153,6 @@ func TestValidate_oneof(t *testing.T) {
 			U: 3,
 			B: true,
 			F: 3,
-		}, valis.EachFields(valistag.Validate)),
+		}, valis.EachFields(tagrule.Validate)),
 	)
 }

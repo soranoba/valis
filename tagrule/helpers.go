@@ -1,4 +1,4 @@
-package valistag
+package tagrule
 
 import (
 	"errors"

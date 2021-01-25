@@ -77,13 +77,14 @@ func main() {
 ```
 
 ### Struct tag
+
 ```go
 package main
 
 import (
 	"fmt"
 	"github.com/soranoba/valis"
-	valistag "github.com/soranoba/valis/tag"
+	"github.com/soranoba/valis/tagrule"
 	"github.com/soranoba/valis/when"
 )
 
@@ -98,7 +99,7 @@ func main() {
 
 	v := valis.NewValidator()
 	// Use the CommonRule if you want to automatically search and validate all hierarchies.
-	v.SetCommonRules(when.IsStruct(valis.EachFields(valistag.Required, valistag.Validate)))
+	v.SetCommonRules(when.IsStruct(valis.EachFields(tagrule.Required, tagrule.Validate)))
 
 	user := User{}
 	if err := v.Validate(&user); err != nil {

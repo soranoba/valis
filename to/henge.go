@@ -1,4 +1,4 @@
-// The package implements some valis.CombinationRule that verifies the converted value.
+// Package to implements some valis.CombinationRule that verifies the converted value.
 package to
 
 import (
@@ -17,15 +17,15 @@ type (
 
 var (
 	// String is a valis.CombinationRule that validates after the value convert to string.
-	String valis.CombinationRule = NewCombinationRule(WrapHengeResultFunc(toStringFunc))
+	String = NewCombinationRule(WrapHengeResultFunc(toStringFunc))
 	// Int is a valis.CombinationRule that validates after the value convert to int64.
-	Int valis.CombinationRule = NewCombinationRule(WrapHengeResultFunc(toIntFunc))
+	Int = NewCombinationRule(WrapHengeResultFunc(toIntFunc))
 	// Uint is a valis.CombinationRule that validates after the value convert to uint64.
-	Uint valis.CombinationRule = NewCombinationRule(WrapHengeResultFunc(toUintFunc))
+	Uint = NewCombinationRule(WrapHengeResultFunc(toUintFunc))
 	// Float is a valis.CombinationRule that validates after the value convert to float64.
-	Float valis.CombinationRule = NewCombinationRule(WrapHengeResultFunc(toFloatFunc))
+	Float = NewCombinationRule(WrapHengeResultFunc(toFloatFunc))
 	// Map is a valis.CombinationRule that validates after the value convert to map[interface{}]interface{}.
-	Map valis.CombinationRule = NewCombinationRule(WrapHengeResultFunc(toMapFunc))
+	Map = NewCombinationRule(WrapHengeResultFunc(toMapFunc))
 )
 
 func (e *hengeError) Error() string {

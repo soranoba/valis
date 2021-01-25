@@ -1,4 +1,4 @@
-// The package implements some valis.WhenRule.
+// Package when implements some valis.WhenRule.
 package when
 
 import (
@@ -8,7 +8,7 @@ import (
 	valishelpers "github.com/soranoba/valis/helpers"
 )
 
-// Returns a valis.WhenRule that verifies the value meets the rules when the type of the validating value has the same type.
+// IsType returns a valis.WhenRule that verifies the value meets the rules when the type of the validating value has the same type.
 func IsType(ty reflect.Type, rules ...valis.Rule) *valis.WhenRule {
 	if ty == nil {
 		panic("invalid type")
@@ -23,7 +23,7 @@ func IsType(ty reflect.Type, rules ...valis.Rule) *valis.WhenRule {
 	return valis.When(cond, rules...)
 }
 
-// Returns a valis.WhenRule that verifies the value meets the rules when the type of the validating value has the same type or pointer type.
+// IsTypeOrPtr returns a valis.WhenRule that verifies the value meets the rules when the type of the validating value has the same type or pointer type.
 func IsTypeOrPtr(ty reflect.Type, rules ...valis.Rule) *valis.WhenRule {
 	if ty == nil {
 		panic("invalid type")
@@ -38,7 +38,7 @@ func IsTypeOrPtr(ty reflect.Type, rules ...valis.Rule) *valis.WhenRule {
 	return valis.When(cond, rules...)
 }
 
-// Returns a valis.WhenRule that verifies the value meets the rules when the type of the validating value has the same type or elem type.
+// IsTypeOrElem returns a valis.WhenRule that verifies the value meets the rules when the type of the validating value has the same type or elem type.
 func IsTypeOrElem(ty reflect.Type, rules ...valis.Rule) *valis.WhenRule {
 	if ty == nil {
 		panic("invalid type")
@@ -53,7 +53,7 @@ func IsTypeOrElem(ty reflect.Type, rules ...valis.Rule) *valis.WhenRule {
 	return valis.When(cond, rules...)
 }
 
-// Returns a valis.WhenRule that verifies the value meets the rules when the value is numeric.
+// IsNumeric returns a valis.WhenRule that verifies the value meets the rules when the value is numeric.
 func IsNumeric(rules ...valis.Rule) *valis.WhenRule {
 	return valis.When(valishelpers.IsNumeric, rules...)
 }

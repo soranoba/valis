@@ -1,4 +1,4 @@
-// The package define error codes.
+// Package code define error codes.
 package code
 
 // Type error codes.

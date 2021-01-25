@@ -1,5 +1,5 @@
-// The package implements some valis.Rule related to field tag.
-package valistag
+// Package tagrule implements some valis.Rule related to field tag.
+package tagrule
 
 import (
 	"github.com/soranoba/henge"

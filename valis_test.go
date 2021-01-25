@@ -8,7 +8,7 @@ import (
 
 	"github.com/soranoba/valis"
 	"github.com/soranoba/valis/is"
-	valistag "github.com/soranoba/valis/tag"
+	"github.com/soranoba/valis/tagrule"
 	"github.com/soranoba/valis/translations"
 	"github.com/soranoba/valis/when"
 	"golang.org/x/text/language"
@@ -128,7 +128,7 @@ func Example_structTag() {
 
 	v := valis.NewValidator()
 	u := User{}
-	if err := v.Validate(&u, when.IsStruct(valis.EachFields(valistag.Required, valistag.Validate))); err != nil {
+	if err := v.Validate(&u, when.IsStruct(valis.EachFields(tagrule.Required, tagrule.Validate))); err != nil {
 		fmt.Println(err)
 	}
 
@@ -173,7 +173,7 @@ func Example_nestedStruct() {
 
 	v := valis.NewValidator()
 	// Use the CommonRule if you want to automatically search and validate all hierarchies.
-	v.SetCommonRules(when.IsStruct(valis.EachFields(valistag.Required, valistag.Validate)))
+	v.SetCommonRules(when.IsStruct(valis.EachFields(tagrule.Required, tagrule.Validate)))
 
 	user := User{}
 	if err := v.Validate(&user); err != nil {
