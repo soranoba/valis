@@ -55,7 +55,7 @@ func (rule *eachFieldsRule) Validate(validator *Validator, value interface{}) {
 	case reflect.Struct:
 		for i := 0; i < val.NumField(); i++ {
 			fieldVal := val.Field(i)
-			if !fieldVal.IsValid() {
+			if !(fieldVal.IsValid() && fieldVal.CanInterface()) {
 				return
 			}
 			field := val.Type().Field(i)
