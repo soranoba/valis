@@ -9,8 +9,10 @@ import (
 	"github.com/soranoba/valis/when"
 	"math"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type (
@@ -27,39 +29,42 @@ var (
 )
 
 var (
+	regexpCache     = map[string]*regexp.Regexp{}
+	regexpCacheLock sync.RWMutex
+
 	validateTagSubKeys = map[string]func(string) ([]valis.Rule, error){
 		"required": func(v string) ([]valis.Rule, error) { // required
 			return []valis.Rule{is.Required}, nil
 		},
-		"lte": func(v string) ([]valis.Rule, error) { // lte=${num}
+		"lte": func(v string) ([]valis.Rule, error) { // lte=10
 			var num float64
 			if _, err := SplitAndParseTagValues(v, " ", &num); err != nil {
 				return nil, err
 			}
 			return []valis.Rule{is.LessThanOrEqualTo(num)}, nil
 		},
-		"lt": func(v string) ([]valis.Rule, error) { // lt=${num}
+		"lt": func(v string) ([]valis.Rule, error) { // lt=10
 			var num float64
 			if _, err := SplitAndParseTagValues(v, " ", &num); err != nil {
 				return nil, err
 			}
 			return []valis.Rule{is.LessThan(num)}, nil
 		},
-		"gte": func(v string) ([]valis.Rule, error) { // gte=${num}
+		"gte": func(v string) ([]valis.Rule, error) { // gte=10
 			var num float64
 			if _, err := SplitAndParseTagValues(v, " ", &num); err != nil {
 				return nil, err
 			}
 			return []valis.Rule{is.GreaterThanOrEqualTo(num)}, nil
 		},
-		"gt": func(v string) ([]valis.Rule, error) { // gt=${num}
+		"gt": func(v string) ([]valis.Rule, error) { // gt=10
 			var num float64
 			if _, err := SplitAndParseTagValues(v, " ", &num); err != nil {
 				return nil, err
 			}
 			return []valis.Rule{is.GreaterThan(num)}, nil
 		},
-		"min": func(v string) ([]valis.Rule, error) { // min=${min}
+		"min": func(v string) ([]valis.Rule, error) { // min=1
 			var min int
 			if _, err := SplitAndParseTagValues(v, " ", &min); err != nil {
 				return nil, err
@@ -70,7 +75,7 @@ var (
 					Else(is.LenBetween(min, math.MaxInt64)),
 			}, nil
 		},
-		"max": func(v string) ([]valis.Rule, error) { // max=${max}
+		"max": func(v string) ([]valis.Rule, error) { // max=10
 			var max int
 			if _, err := SplitAndParseTagValues(v, " ", &max); err != nil {
 				return nil, err
@@ -82,11 +87,28 @@ var (
 			}, nil
 		},
 		"oneof": func(v string) ([]valis.Rule, error) { // oneof=1 2
-			elems := strings.Split(v, " ")
-			if len(elems) == 0 {
+			if v == "" {
 				return nil, errInsufficientNumberOfTagParameters
 			}
+			elems := strings.Split(v, " ")
 			return []valis.Rule{&oneofRule{elems: elems}}, nil
+		},
+		"regexp": func(v string) ([]valis.Rule, error) { // regexp=^[0-9]+$
+			if v == "" {
+				return nil, errInsufficientNumberOfTagParameters
+			}
+
+			regexpCacheLock.RLock()
+			re, ok := regexpCache[v]
+			regexpCacheLock.RUnlock()
+
+			if !ok {
+				re = regexp.MustCompile(v)
+				regexpCacheLock.Lock()
+				regexpCache[v] = re
+				regexpCacheLock.Unlock()
+			}
+			return []valis.Rule{is.Match(re)}, nil
 		},
 	}
 )

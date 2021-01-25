@@ -39,4 +39,5 @@ const (
 	GreaterThanOrEqual = "gte"              // %[1]v = Number
 	LessThanOrEqual    = "lte"              // %[1]v = Number
 	Inclusion          = "inclusion"        // %[1]v = List
+	RegexpMismatch     = "regexp"           // %[1]s = regexp
 )

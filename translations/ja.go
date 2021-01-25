@@ -41,4 +41,5 @@ func DefaultJapanese(c *catalog.Builder) {
 	c.Set(tag, code.LessThanOrEqual, catalog.String("は%[1]vより小さい値にする必要があります"))
 
 	c.Set(tag, code.Inclusion, catalog.String("は %[1]v のいずれかである必要があります"))
+	c.Set(tag, code.RegexpMismatch, catalog.String("は正規表現 (%[1]s) に一致しません"))
 }

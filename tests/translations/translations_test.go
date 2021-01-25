@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
+	"regexp"
 	"testing"
 )
 
@@ -122,6 +123,10 @@ func TestTranslations(t *testing.T) {
 		f(code.Inclusion, []interface{}{"male", "female"})(Results{
 			en: "is not included in [male female]",
 			ja: "は [male female] のいずれかである必要があります",
+		}),
+		f(code.RegexpMismatch, regexp.MustCompile("^[0-9]+$").String())(Results{
+			en: "is a mismatch with the regular expression. (^[0-9]+$)",
+			ja: "は正規表現 (^[0-9]+$) に一致しません",
 		}),
 	}
 

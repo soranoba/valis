@@ -4,6 +4,7 @@ package is
 import (
 	"math"
 	"reflect"
+	"regexp"
 	"unicode/utf8"
 
 	"github.com/soranoba/henge"
@@ -33,6 +34,9 @@ type (
 		isExcludingLower bool
 		upper            interface{}
 		isExcludingUpper bool
+	}
+	matchRule struct {
+		re *regexp.Regexp
 	}
 )
 
@@ -295,5 +299,29 @@ func (rule *rangeRule) Validate(validator *valis.Validator, value interface{}) {
 		}
 	default:
 		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.NotNumeric, value))
+	}
+}
+
+func MatchString(r string) valis.Rule {
+	re := regexp.MustCompile(r)
+	return &matchRule{re: re}
+}
+
+func Match(re *regexp.Regexp) valis.Rule {
+	return &matchRule{re: re}
+}
+
+func (rule *matchRule) Validate(validator *valis.Validator, value interface{}) {
+	val := reflect.ValueOf(value)
+	for val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
+	if val.Kind() != reflect.String {
+		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.NotString, value))
+		return
+	}
+	if !rule.re.MatchString(val.Interface().(string)) {
+		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.RegexpMismatch, value, rule.re.String()))
 	}
 }

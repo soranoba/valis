@@ -132,3 +132,27 @@ func TestValidate_oneof(t *testing.T) {
 		}, valis.EachFields(valistag.Validate)),
 	)
 }
+
+func TestValidate_regexp(t *testing.T) {
+	assert := assert.New(t)
+
+	type User struct {
+		Name string `validate:"regexp=^[a-z]+$"`
+	}
+
+	assert.EqualError(
+		v.Validate(&User{}, valis.EachFields(valistag.Validate)),
+		"(regexp) .Name is a mismatch with the regular expression. (^[a-z]+$)",
+	)
+	assert.EqualError(
+		v.Validate(&User{
+			Name: "abc0123",
+		}, valis.EachFields(valistag.Validate)),
+		"(regexp) .Name is a mismatch with the regular expression. (^[a-z]+$)",
+	)
+	assert.NoError(
+		v.Validate(&User{
+			Name: "abcdef",
+		}, valis.EachFields(valistag.Validate)),
+	)
+}

@@ -54,4 +54,5 @@ func DefaultEnglish(c *catalog.Builder) {
 	c.Set(tag, code.LessThanOrEqual, catalog.String("must be less than or equal to %[1]v"))
 
 	c.Set(tag, code.Inclusion, catalog.String("is not included in %[1]v"))
+	c.Set(tag, code.RegexpMismatch, catalog.String("is a mismatch with the regular expression. (%[1]s)"))
 }

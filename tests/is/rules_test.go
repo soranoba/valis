@@ -370,3 +370,22 @@ func TestRange(t *testing.T) {
 		f(v, valis.Validate(v, is.Range(-1, 1)), v >= -1 && v <= 1)
 	}
 }
+
+func TestMatch(t *testing.T) {
+	assert := assert.New(t)
+
+	assert.EqualError(
+		valis.Validate(0, is.MatchString("^[0-9]+$")),
+		"(not_string) must be any string",
+	)
+	assert.EqualError(
+		valis.Validate("123456abc", is.MatchString("^[0-9]+$")),
+		"(regexp) is a mismatch with the regular expression. (^[0-9]+$)",
+	)
+	assert.NoError(
+		valis.Validate("123456789", is.MatchString("^[0-9]+$")),
+	)
+	assert.NoError(
+		valis.Validate(henge.New("123456789").StringPtr().Value(), is.MatchString("^[0-9]+$")),
+	)
+}
