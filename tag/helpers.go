@@ -6,11 +6,15 @@ import (
 	"strings"
 )
 
+var (
+	errInsufficientNumberOfTagParameters = errors.New("insufficient number of tag parameters")
+)
+
 func SplitAndParseTagValues(s string, sep string, outs ...interface{}) (count int, err error) {
 	for _, elem := range strings.Split(s, sep) {
 		if elem != "" {
 			if len(outs) <= count {
-				return count, errors.New("insufficient number of tag parameters")
+				return count, errInsufficientNumberOfTagParameters
 			}
 			if err := henge.New(elem).Convert(outs[count]); err != nil {
 				return count, err

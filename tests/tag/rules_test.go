@@ -103,3 +103,32 @@ func TestValidate_max(t *testing.T) {
 		}, valis.EachFields(valistag.Validate)),
 	)
 }
+
+func TestValidate_oneof(t *testing.T) {
+	assert := assert.New(t)
+
+	type Model struct {
+		S string  `validate:"oneof=a b c"`
+		I int     `validate:"oneof=1 2 3"`
+		U uint    `validate:"oneof=1 2 3"`
+		B bool    `validate:"oneof=true"`
+		F float64 `validate:"oneof=1 2.5 3"`
+	}
+	assert.EqualError(
+		v.Validate(&Model{}, valis.EachFields(valistag.Validate)),
+		`(inclusion) .S is not included in [a b c]
+(inclusion) .I is not included in [1 2 3]
+(inclusion) .U is not included in [1 2 3]
+(inclusion) .B is not included in [true]
+(inclusion) .F is not included in [1 2.5 3]`,
+	)
+	assert.NoError(
+		v.Validate(&Model{
+			S: "a",
+			I: 2,
+			U: 3,
+			B: true,
+			F: 3,
+		}, valis.EachFields(valistag.Validate)),
+	)
+}
