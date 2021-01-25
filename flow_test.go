@@ -10,8 +10,8 @@ import (
 func ExampleWhen() {
 	v := valis.NewValidator()
 
-	isInt := func(v interface{}) bool {
-		return reflect.ValueOf(v).Kind() == reflect.Int
+	isInt := func(ctx *valis.WhenContext) bool {
+		return reflect.ValueOf(ctx.Value()).Kind() == reflect.Int
 	}
 
 	if err := v.Validate(0, valis.When(isInt, is.Required)); err != nil {

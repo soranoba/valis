@@ -22,8 +22,8 @@ func TestOr(t *testing.T) {
 func TestWhen(t *testing.T) {
 	assert := assert.New(t)
 
-	Any := func(interface{}) bool { return true }
-	Never := func(interface{}) bool { return false }
+	Any := func(ctx *valis.WhenContext) bool { return true }
+	Never := func(ctx *valis.WhenContext) bool { return false }
 	assert.EqualError(
 		v.Validate("", valis.When(Any, is.Required)),
 		"(required) is required",
@@ -34,8 +34,8 @@ func TestWhen(t *testing.T) {
 func TestWhen_ElseIf(t *testing.T) {
 	assert := assert.New(t)
 
-	Any := func(interface{}) bool { return true }
-	Never := func(interface{}) bool { return false }
+	Any := func(ctx *valis.WhenContext) bool { return true }
+	Never := func(ctx *valis.WhenContext) bool { return false }
 	assert.NoError(
 		v.Validate("", valis.When(Never, is.Zero)),
 	)
@@ -51,8 +51,8 @@ func TestWhen_ElseIf(t *testing.T) {
 func TestWhen_ElseWhen(t *testing.T) {
 	assert := assert.New(t)
 
-	Any := func(interface{}) bool { return true }
-	Never := func(interface{}) bool { return false }
+	Any := func(ctx *valis.WhenContext) bool { return true }
+	Never := func(ctx *valis.WhenContext) bool { return false }
 	assert.NoError(
 		v.Validate("", valis.When(Never, is.Zero)),
 	)
@@ -93,8 +93,8 @@ func TestWhen_ElseWhen(t *testing.T) {
 func TestWhen_Else(t *testing.T) {
 	assert := assert.New(t)
 
-	Any := func(interface{}) bool { return true }
-	Never := func(interface{}) bool { return false }
+	Any := func(ctx *valis.WhenContext) bool { return true }
+	Never := func(ctx *valis.WhenContext) bool { return false }
 	assert.NoError(
 		v.Validate("", valis.When(Never, is.Zero)),
 	)

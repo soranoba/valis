@@ -13,8 +13,8 @@ func IsType(ty reflect.Type, rules ...valis.Rule) *valis.WhenRule {
 	if ty == nil {
 		panic("invalid type")
 	}
-	cond := func(value interface{}) bool {
-		val := reflect.ValueOf(value)
+	cond := func(ctx *valis.WhenContext) bool {
+		val := reflect.ValueOf(ctx.Value())
 		if !val.IsValid() {
 			return false
 		}
@@ -28,8 +28,8 @@ func IsTypeOrPtr(ty reflect.Type, rules ...valis.Rule) *valis.WhenRule {
 	if ty == nil {
 		panic("invalid type")
 	}
-	cond := func(value interface{}) bool {
-		val := reflect.ValueOf(value)
+	cond := func(ctx *valis.WhenContext) bool {
+		val := reflect.ValueOf(ctx.Value())
 		if !val.IsValid() {
 			return false
 		}
@@ -43,8 +43,8 @@ func IsTypeOrElem(ty reflect.Type, rules ...valis.Rule) *valis.WhenRule {
 	if ty == nil {
 		panic("invalid type")
 	}
-	cond := func(value interface{}) bool {
-		val := reflect.ValueOf(value)
+	cond := func(ctx *valis.WhenContext) bool {
+		val := reflect.ValueOf(ctx.Value())
 		if !val.IsValid() {
 			return false
 		}
@@ -55,5 +55,8 @@ func IsTypeOrElem(ty reflect.Type, rules ...valis.Rule) *valis.WhenRule {
 
 // IsNumeric returns a valis.WhenRule that verifies the value meets the rules when the value is numeric.
 func IsNumeric(rules ...valis.Rule) *valis.WhenRule {
-	return valis.When(valishelpers.IsNumeric, rules...)
+	cond := func(ctx *valis.WhenContext) bool {
+		return valishelpers.IsNumeric(ctx.Value())
+	}
+	return valis.When(cond, rules...)
 }

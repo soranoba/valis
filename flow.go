@@ -6,8 +6,14 @@ import (
 )
 
 type (
+	// WhenRule is a rule that verifies the value meets the rules when conditions return true.
 	WhenRule struct {
 		condAndRules []*condAndRule
+	}
+	// WhenContext is an argument of conditions used by WhenRule.
+	WhenContext struct {
+		value interface{}
+		loc   *Location
 	}
 )
 
@@ -19,7 +25,7 @@ type (
 		rules []Rule
 	}
 	condAndRule struct {
-		cond  func(interface{}) bool
+		cond  func(ctx *WhenContext) bool
 		rules []Rule
 	}
 	eachRule struct {
@@ -66,12 +72,12 @@ func (r *orRule) Validate(validator *Validator, value interface{}) {
 }
 
 // If is equiv to When
-func If(cond func(interface{}) bool, rules ...Rule) *WhenRule {
+func If(cond func(ctx *WhenContext) bool, rules ...Rule) *WhenRule {
 	return When(cond, rules...)
 }
 
 // When returns a new Rule verify the value meets the rules when cond returns true.
-func When(cond func(interface{}) bool, rules ...Rule) *WhenRule {
+func When(cond func(ctx *WhenContext) bool, rules ...Rule) *WhenRule {
 	return &WhenRule{condAndRules: []*condAndRule{{cond: cond, rules: rules}}}
 }
 
@@ -82,26 +88,37 @@ func (r *WhenRule) ElseWhen(rule *WhenRule) *WhenRule {
 }
 
 // ElseIf set some Rule verified when all before conditions return false and cond returns true. And it returns self.
-func (r *WhenRule) ElseIf(cond func(interface{}) bool, rules ...Rule) *WhenRule {
+func (r *WhenRule) ElseIf(cond func(ctx *WhenContext) bool, rules ...Rule) *WhenRule {
 	r.condAndRules = append(r.condAndRules, &condAndRule{cond: cond, rules: rules})
 	return r
 }
 
 // Else set the rules verified when all conditions return false, and returns self.
 func (r WhenRule) Else(rules ...Rule) Rule {
-	return r.ElseIf(func(interface{}) bool { return true }, rules...)
+	return r.ElseIf(func(ctx *WhenContext) bool { return true }, rules...)
 }
 
 // See Rule.Validate
 func (r WhenRule) Validate(validator *Validator, value interface{}) {
+	ctx := &WhenContext{loc: validator.loc, value: value}
 	for _, condAndRule := range r.condAndRules {
-		if condAndRule.cond(value) {
+		if condAndRule.cond(ctx) {
 			for _, rule := range condAndRule.rules {
 				rule.Validate(validator, value)
 			}
 			return
 		}
 	}
+}
+
+// Location returns a current location.
+func (ctx *WhenContext) Location() *Location {
+	return ctx.loc
+}
+
+// Value returns the validating value.
+func (ctx *WhenContext) Value() interface{} {
+	return ctx.value
 }
 
 // Each returns a new rule that verifies all elements of the array or slice meet the rules and all common rules.
