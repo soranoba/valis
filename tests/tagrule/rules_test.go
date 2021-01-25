@@ -35,27 +35,54 @@ func TestRequired(t *testing.T) {
 	)
 }
 
-func TestFormat(t *testing.T) {
+func TestPattern(t *testing.T) {
 	assert := assert.New(t)
 
 	type User struct {
-		Name string `format:"^[a-z]+$"`
+		Name string `pattern:"^[a-z]+$"`
 	}
 
 	assert.EqualError(
-		v.Validate(&User{}, valis.EachFields(tagrule.Format)),
+		v.Validate(&User{}, valis.EachFields(tagrule.Pattern)),
 		"(regexp) .Name is a mismatch with the regular expression. (^[a-z]+$)",
 	)
 	assert.EqualError(
 		v.Validate(&User{
 			Name: "abc0123",
-		}, valis.EachFields(tagrule.Format)),
+		}, valis.EachFields(tagrule.Pattern)),
 		"(regexp) .Name is a mismatch with the regular expression. (^[a-z]+$)",
 	)
 	assert.NoError(
 		v.Validate(&User{
 			Name: "abcdef",
-		}, valis.EachFields(tagrule.Format)),
+		}, valis.EachFields(tagrule.Pattern)),
+	)
+}
+
+func TestEnums(t *testing.T) {
+	assert := assert.New(t)
+
+	type User struct {
+		Name string `enums:"alice,bob"`
+		Age  int    `enums:"20,30"`
+	}
+
+	assert.EqualError(
+		v.Validate(&User{}, valis.EachFields(tagrule.Enums)),
+		"(inclusion) .Name is not included in [alice bob]\n(inclusion) .Age is not included in [20 30]",
+	)
+	assert.EqualError(
+		v.Validate(&User{
+			Name: "a",
+			Age:  10,
+		}, valis.EachFields(tagrule.Enums)),
+		"(inclusion) .Name is not included in [alice bob]\n(inclusion) .Age is not included in [20 30]",
+	)
+	assert.NoError(
+		v.Validate(&User{
+			Name: "alice",
+			Age:  20,
+		}, valis.EachFields(tagrule.Enums)),
 	)
 }
 

@@ -4,8 +4,8 @@ package tagrule
 import (
 	"github.com/soranoba/henge"
 	"github.com/soranoba/valis"
-	"github.com/soranoba/valis/code"
 	"github.com/soranoba/valis/is"
+	"github.com/soranoba/valis/to"
 	"github.com/soranoba/valis/when"
 	"math"
 	"reflect"
@@ -19,10 +19,8 @@ type (
 
 type (
 	requiredTagHandler struct{}
-	formatTagHandler   struct{}
-	oneofRule          struct {
-		elems []string
-	}
+	patternTagHandler  struct{}
+	enumsTagHandler    struct{}
 )
 
 var (
@@ -33,14 +31,21 @@ var (
 	//   `required:"true"`
 	//
 	Required = valis.NewFieldTagRule("required", &requiredTagHandler{})
-	// Format is a `format` tag rule.
+	// Format is a `pattern` tag rule.
 	// See also is.MatchString rule.
 	//
 	// For example,
-	//   `format:"^[0-9]+$"`
-	//   `format:"^\\d+$"`
+	//   `pattern:"^[0-9]+$"`
+	//   `pattern:"^\\d+$"`
 	//
-	Format = valis.NewFieldTagRule("format", &formatTagHandler{})
+	Pattern = valis.NewFieldTagRule("pattern", &patternTagHandler{})
+	// Enums is a `enums` tag rule.
+	// After converting the type, it applies the is.In rule.
+	//
+	// For example,
+	//   `enums:"a,b"`
+	//   `enums:"1,2"`
+	Enums = valis.NewFieldTagRule("enums", &enumsTagHandler{})
 	// Validate is a `validate` tag rule.
 	Validate = valis.NewFieldTagRule("validate", &ValidateTagHandler{})
 )
@@ -104,8 +109,8 @@ var (
 			if v == "" {
 				return nil, errInsufficientNumberOfTagParameters
 			}
-			elems := strings.Split(v, " ")
-			return []valis.Rule{&oneofRule{elems: elems}}, nil
+			elems := henge.New(strings.Split(v, " ")).Slice().Value()
+			return []valis.Rule{to.String(is.In(elems...))}, nil
 		},
 	}
 )
@@ -143,23 +148,17 @@ func (h *ValidateTagHandler) ParseTagValue(tagValue string) ([]valis.Rule, error
 	return rules, nil
 }
 
-func (h *formatTagHandler) ParseTagValue(tagValue string) ([]valis.Rule, error) {
+func (h *patternTagHandler) ParseTagValue(tagValue string) ([]valis.Rule, error) {
 	if tagValue == "" {
 		return nil, errInsufficientNumberOfTagParameters
 	}
 	return []valis.Rule{is.MatchString(tagValue)}, nil
 }
 
-func (rule *oneofRule) Validate(validator *valis.Validator, value interface{}) {
-	val, err := henge.New(value).String().Result()
-	if err != nil {
-		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.ConversionFailed, value, err))
+func (h *enumsTagHandler) ParseTagValue(tagValue string) ([]valis.Rule, error) {
+	if tagValue == "" {
+		return nil, errInsufficientNumberOfTagParameters
 	}
-
-	for _, elem := range rule.elems {
-		if elem == val {
-			return
-		}
-	}
-	validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.Inclusion, value, rule.elems))
+	elems := henge.New(strings.Split(tagValue, ",")).Slice().Value()
+	return []valis.Rule{to.String(is.In(elems...))}, nil
 }
