@@ -60,28 +60,28 @@ var (
 			if _, err := SplitAndParseTagValues(v, " ", &num); err != nil {
 				return nil, err
 			}
-			return []valis.Rule{is.LessThanOrEqualTo(num)}, nil
+			return []valis.Rule{when.IsNil().Else(is.LessThanOrEqualTo(num))}, nil
 		},
 		"lt": func(v string) ([]valis.Rule, error) { // lt=10
 			var num float64
 			if _, err := SplitAndParseTagValues(v, " ", &num); err != nil {
 				return nil, err
 			}
-			return []valis.Rule{is.LessThan(num)}, nil
+			return []valis.Rule{when.IsNil().Else(is.LessThan(num))}, nil
 		},
 		"gte": func(v string) ([]valis.Rule, error) { // gte=10
 			var num float64
 			if _, err := SplitAndParseTagValues(v, " ", &num); err != nil {
 				return nil, err
 			}
-			return []valis.Rule{is.GreaterThanOrEqualTo(num)}, nil
+			return []valis.Rule{when.IsNil().Else(is.GreaterThanOrEqualTo(num))}, nil
 		},
 		"gt": func(v string) ([]valis.Rule, error) { // gt=10
 			var num float64
 			if _, err := SplitAndParseTagValues(v, " ", &num); err != nil {
 				return nil, err
 			}
-			return []valis.Rule{is.GreaterThan(num)}, nil
+			return []valis.Rule{when.IsNil().Else(is.GreaterThan(num))}, nil
 		},
 		"min": func(v string) ([]valis.Rule, error) { // min=1
 			var min int
@@ -89,7 +89,8 @@ var (
 				return nil, err
 			}
 			return []valis.Rule{
-				when.IsNumeric(is.Min(min)).
+				when.IsNil().
+					ElseWhen(when.IsNumeric(is.Min(min))).
 					ElseWhen(when.IsTypeOrElem(reflect.TypeOf((*string)(nil)), is.LengthBetween(min, math.MaxInt64))).
 					Else(is.LenBetween(min, math.MaxInt64)),
 			}, nil
@@ -100,7 +101,8 @@ var (
 				return nil, err
 			}
 			return []valis.Rule{
-				when.IsNumeric(is.Min(max)).
+				when.IsNil().
+					ElseWhen(when.IsNumeric(is.Max(max))).
 					ElseWhen(when.IsTypeOrElem(reflect.TypeOf((*string)(nil)), is.LengthBetween(0, max))).
 					Else(is.LenBetween(0, max)),
 			}, nil
@@ -110,7 +112,7 @@ var (
 				return nil, errInsufficientNumberOfTagParameters
 			}
 			elems := henge.New(strings.Split(v, " ")).Slice().Value()
-			return []valis.Rule{to.String(is.In(elems...))}, nil
+			return []valis.Rule{when.IsNil().Else(to.String(is.In(elems...)))}, nil
 		},
 	}
 )
@@ -152,7 +154,7 @@ func (h *patternTagHandler) ParseTagValue(tagValue string) ([]valis.Rule, error)
 	if tagValue == "" {
 		return nil, errInsufficientNumberOfTagParameters
 	}
-	return []valis.Rule{is.MatchString(tagValue)}, nil
+	return []valis.Rule{when.IsNil().Else(is.MatchString(tagValue))}, nil
 }
 
 func (h *enumsTagHandler) ParseTagValue(tagValue string) ([]valis.Rule, error) {
@@ -160,5 +162,5 @@ func (h *enumsTagHandler) ParseTagValue(tagValue string) ([]valis.Rule, error) {
 		return nil, errInsufficientNumberOfTagParameters
 	}
 	elems := henge.New(strings.Split(tagValue, ",")).Slice().Value()
-	return []valis.Rule{to.String(is.In(elems...))}, nil
+	return []valis.Rule{when.IsNil().Else(to.String(is.In(elems...)))}, nil
 }
