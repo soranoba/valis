@@ -37,6 +37,10 @@ func GetField(structPointer interface{}, fieldPointer interface{}) *reflect.Stru
 // IsNumeric returns true if v is numeric type. Otherwise, it returns false.
 func IsNumeric(v interface{}) bool {
 	val := reflect.ValueOf(v)
+	for val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
 	switch val.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,

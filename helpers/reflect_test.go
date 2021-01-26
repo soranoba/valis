@@ -19,11 +19,16 @@ func ExampleIsNumeric() {
 	if IsNumeric(1.25) {
 		fmt.Println("float is numeric")
 	}
+	i := 5
+	if IsNumeric(&i) {
+		fmt.Println("*int is numeric")
+	}
 	if !IsNumeric("1.25") {
 		fmt.Println("string is not numeric")
 	}
 	// Output:
 	// float is numeric
+	// *int is numeric
 	// string is not numeric
 }
 
