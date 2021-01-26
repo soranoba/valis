@@ -60,3 +60,11 @@ func IsNumeric(rules ...valis.Rule) *valis.WhenRule {
 	}
 	return valis.When(cond, rules...)
 }
+
+// IsNil returns a valis.WhenRule that verifies the value meets the rules when the value is nil.
+func IsNil(rules ...valis.Rule) *valis.WhenRule {
+	cond := func(ctx *valis.WhenContext) bool {
+		return valishelpers.IsNil(ctx.Value())
+	}
+	return valis.When(cond, rules...)
+}

@@ -46,3 +46,17 @@ func IsNumeric(v interface{}) bool {
 		return false
 	}
 }
+
+// IsNil returns true if v is nil. Otherwise, it returns false.
+func IsNil(v interface{}) bool {
+	val := reflect.ValueOf(v)
+	switch val.Kind() {
+	case reflect.Invalid:
+		return true
+	case reflect.Chan, reflect.Func, reflect.Map, reflect.Ptr, reflect.UnsafePointer,
+		reflect.Interface, reflect.Slice:
+		return val.IsNil()
+	default:
+		return false
+	}
+}

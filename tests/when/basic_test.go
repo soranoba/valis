@@ -123,3 +123,17 @@ func TestIsNumeric(t *testing.T) {
 		"(zero_only) must be blank",
 	)
 }
+
+func TestIsNil(t *testing.T) {
+	assert := assert.New(t)
+
+	var s []string
+	assert.EqualError(
+		v.Validate(s, is.Never),
+		"(invalid) is invalid",
+	)
+
+	assert.NoError(
+		v.Validate(s, when.IsNil().Else(is.Never)),
+	)
+}

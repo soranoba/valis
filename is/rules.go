@@ -18,6 +18,7 @@ type (
 	zeroRule         struct{}
 	nilOrNonZeroRule struct{}
 	anyRule          struct{}
+	neverRule        struct{}
 	inclusionRule    struct {
 		values []interface{}
 	}
@@ -50,6 +51,8 @@ var (
 	NilOrNonZero valis.Rule = &nilOrNonZeroRule{}
 	// Any is a rule indicating that any value is acceptable.
 	Any valis.Rule = &anyRule{}
+	// Never is a rule indicating that any value is not acceptable.
+	Never valis.Rule = &neverRule{}
 )
 
 func (rule *requiredRule) Validate(validator *valis.Validator, value interface{}) {
@@ -88,6 +91,10 @@ func (rule *nilOrNonZeroRule) Validate(validator *valis.Validator, value interfa
 
 func (rule *anyRule) Validate(validator *valis.Validator, value interface{}) {
 	// NOP
+}
+
+func (rule *neverRule) Validate(validator *valis.Validator, value interface{}) {
+	validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.Invalid, value))
 }
 
 // Returns a rule to verify inclusion in the values.

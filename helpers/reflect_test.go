@@ -26,3 +26,19 @@ func ExampleIsNumeric() {
 	// float is numeric
 	// string is not numeric
 }
+
+func ExampleIsNil() {
+	if IsNil(nil) {
+		fmt.Println("nil is nil")
+	}
+	if IsNil((*string)(nil)) {
+		fmt.Println("(*string)(nil) is nil")
+	}
+	if !IsNil("") {
+		fmt.Println("\"\" is not nil")
+	}
+	// Output:
+	// nil is nil
+	// (*string)(nil) is nil
+	// "" is not nil
+}

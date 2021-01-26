@@ -146,6 +146,39 @@ func TestAny(t *testing.T) {
 	}
 }
 
+func TestNever(t *testing.T) {
+	assert := assert.New(t)
+	testCases := []SimpleTestCase{
+		{"", false},
+		{0, false},
+		{nil, false},
+		{"a", false},
+		{1, false},
+		{[...]string{}, false},
+		{[...]string{""}, false},
+		{[...]string{"abc"}, false},
+		{map[string]string(nil), false},
+		{map[string]string{}, false},
+		{map[string]string{"": ""}, false},
+		{struct{}{}, false},
+		{struct{ Name string }{"name"}, false},
+	}
+
+	for _, testCase := range testCases {
+		err := valis.Validate(testCase.Value, is.Never)
+		msg := fmt.Sprintf("%#v", testCase)
+		if testCase.IsValid {
+			assert.NoError(err, msg)
+		} else {
+			if assert.Error(err, msg) {
+				details := err.(*valis.ValidationError).Details()
+				assert.Len(details, 1)
+				assert.Equal(code.Invalid, details[0].Code())
+			}
+		}
+	}
+}
+
 func TestIn(t *testing.T) {
 	assert := assert.New(t)
 
