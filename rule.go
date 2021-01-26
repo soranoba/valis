@@ -15,11 +15,11 @@ type (
 )
 
 type (
-	// If implemented, Validate will be executed by the ValidatableRule.
+	// Validatable will be delegated the validation by the ValidatableRule if implemented.
 	Validatable interface {
 		Validate() error
 	}
-	// If implemented, ValidatableWithValidator will be executed by the ValidatableRule.
+	// ValidatableWithValidator will be delegated the validation by the ValidatableRule if implemented.
 	ValidatableWithValidator interface {
 		Validate(validator *Validator)
 	}

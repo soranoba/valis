@@ -18,7 +18,7 @@ type (
 	}
 )
 
-// Returns a new rule that verifies the converted value met all rules and all common rules.
+// To returns a new rule that verifies the converted value met all rules and all common rules.
 func To(convertFunc ConvertFunc, rules ...Rule) Rule {
 	return &toRule{convertFunc: convertFunc, rules: rules}
 }

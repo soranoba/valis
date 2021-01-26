@@ -74,6 +74,8 @@ func (v *Validator) Location() *Location {
 	return v.loc
 }
 
+// DiveField moves from the current position to the next location specified the field and performs validation processing.
+// Do not use it outside of Rules.
 func (v *Validator) DiveField(field *reflect.StructField, f func(v *Validator)) {
 	loc := v.loc
 	v.loc = loc.FieldLocation(field)
@@ -81,6 +83,8 @@ func (v *Validator) DiveField(field *reflect.StructField, f func(v *Validator)) 
 	v.loc = loc
 }
 
+// DiveIndex moves from the current position to the next location specified the index and performs validation processing.
+// Do not use it outside of Rules.
 func (v *Validator) DiveIndex(index int, f func(v *Validator)) {
 	loc := v.loc
 	v.loc = loc.IndexLocation(index)
@@ -88,6 +92,8 @@ func (v *Validator) DiveIndex(index int, f func(v *Validator)) {
 	v.loc = loc
 }
 
+// DiveMapKey moves from the current position to the next location specified the key and performs validation processing.
+// Do not use it outside of Rules.
 func (v *Validator) DiveMapKey(key interface{}, f func(v *Validator)) {
 	loc := v.loc
 	v.loc = loc.MapKeyLocation(key)
@@ -95,6 +101,8 @@ func (v *Validator) DiveMapKey(key interface{}, f func(v *Validator)) {
 	v.loc = loc
 }
 
+// DiveMapValue moves from the current position to the next location specified the key and performs validation processing.
+// Do not use it outside of Rules.
 func (v *Validator) DiveMapValue(key interface{}, f func(v *Validator)) {
 	loc := v.loc
 	v.loc = loc.MapValueLocation(key)
