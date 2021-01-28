@@ -68,7 +68,7 @@ func main() {
 	u := &User{}
 	if err := valis.Validate(
 		&u,
-		valis.Field(&u.Name, is.Required),
+		valis.Field(&u.Name, is.NonZero),
 		valis.Field(&u.Age, is.Min(20)),
 	); err != nil {
 		fmt.Println(err)
@@ -90,10 +90,10 @@ import (
 
 func main() {
 	type User struct {
-		Name    string `required:"true"`
-		Age     int    `validate:"min=20"`
+		Name    *string `required:"true"`
+		Age     int     `validate:"min=20"`
 		Company struct {
-			Location string `required:"true"`
+			Location *string `required:"true"`
 		}
 	}
 
