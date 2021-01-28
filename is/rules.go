@@ -3,6 +3,7 @@ package is
 
 import (
 	"math"
+	"net/url"
 	"reflect"
 	"regexp"
 	"unicode/utf8"
@@ -19,7 +20,10 @@ type (
 	nilOrNonZeroRule struct{}
 	anyRule          struct{}
 	neverRule        struct{}
-	inclusionRule    struct {
+	urlRule          struct {
+		schemes []string
+	}
+	inclusionRule struct {
 		values []interface{}
 	}
 	lengthRule struct {
@@ -95,6 +99,41 @@ func (rule *anyRule) Validate(validator *valis.Validator, value interface{}) {
 
 func (rule *neverRule) Validate(validator *valis.Validator, value interface{}) {
 	validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.Invalid, value))
+}
+
+// URL returns a rule to verify URL format.
+//
+// When you specify schemes, it verifies the scheme inclusion in those schemes.
+// When you not specified, all schemes are allowed.
+func URL(schemes ...string) valis.Rule {
+	return &urlRule{schemes: schemes}
+}
+
+func (rule *urlRule) Validate(validator *valis.Validator, value interface{}) {
+	val := reflect.ValueOf(value)
+	for val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+	if val.Kind() != reflect.String {
+		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.NotString, value))
+		return
+	}
+	if val.CanInterface() {
+		txt := val.Interface().(string)
+		u, err := url.Parse(txt)
+		if err != nil {
+			validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.InvalidURLFormat, value, err))
+		} else if len(rule.schemes) == 0 {
+			// valid
+		} else {
+			for _, scheme := range rule.schemes {
+				if scheme == u.Scheme {
+					return // valid
+				}
+			}
+			validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.InvalidScheme, value, rule.schemes))
+		}
+	}
 }
 
 // In returns a rule to verify inclusion in the values.

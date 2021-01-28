@@ -114,6 +114,12 @@ var (
 			elems := henge.New(strings.Split(v, " ")).Slice().Value()
 			return []valis.Rule{when.IsNil().Else(to.String(is.In(elems...)))}, nil
 		},
+		"url": func(v string) ([]valis.Rule, error) { // url=http https
+			if v == "" {
+				return []valis.Rule{is.URL()}, nil
+			}
+			return []valis.Rule{is.URL(strings.Split(v, " ")...)}, nil
+		},
 	}
 )
 

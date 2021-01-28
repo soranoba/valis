@@ -40,4 +40,6 @@ const (
 	LessThanOrEqual    = "lte"              // %[1]v = Number
 	Inclusion          = "inclusion"        // %[1]v = List
 	RegexpMismatch     = "regexp"           // %[1]s = regexp
+	InvalidURLFormat   = "invalid_url"      // %[1]v = Error
+	InvalidScheme      = "invalid_scheme"   // %[1]v = List
 )

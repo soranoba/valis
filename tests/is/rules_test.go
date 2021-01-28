@@ -179,6 +179,25 @@ func TestNever(t *testing.T) {
 	}
 }
 
+func TestURL(t *testing.T) {
+	assert := assert.New(t)
+
+	assert.NoError(
+		valis.Validate("http://example.com?a=b", is.URL("http", "https")),
+	)
+	assert.EqualError(
+		valis.Validate("scp://example.com?a=b", is.URL("http")),
+		"(invalid_scheme) which scheme is not included in [http]",
+	)
+	assert.NoError(
+		valis.Validate(henge.ToStringPtr("scp://example.com?a=b"), is.URL()),
+	)
+	assert.EqualError(
+		valis.Validate(1, is.URL()),
+		"(not_string) must be any string",
+	)
+}
+
 func TestIn(t *testing.T) {
 	assert := assert.New(t)
 

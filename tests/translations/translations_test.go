@@ -128,6 +128,14 @@ func TestTranslations(t *testing.T) {
 			en: "is a mismatch with the regular expression. (^[0-9]+$)",
 			ja: "は正規表現 (^[0-9]+$) に一致しません",
 		}),
+		f(code.InvalidURLFormat, errors.New("hoge"))(Results{
+			en: "is an invalid url format",
+			ja: "は不正なURLです",
+		}),
+		f(code.InvalidScheme, []string{"http", "https"})(Results{
+			en: "which scheme is not included in [http https]",
+			ja: "のスキームは [http https] のいずれかである必要があります",
+		}),
 	}
 
 	c := translations.NewCatalog()

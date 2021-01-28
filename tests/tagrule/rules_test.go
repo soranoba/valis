@@ -307,3 +307,29 @@ func TestValidate_oneof(t *testing.T) {
 		}, valis.EachFields(tagrule.Validate)),
 	)
 }
+
+func TestValidate_url(t *testing.T) {
+	assert := assert.New(t)
+
+	type Model struct {
+		U1 *string `validate:"url=http https"`
+		U2 string  `validate:"url"`
+		U3 string  `validate:"url=scp"`
+	}
+	assert.NoError(
+		v.Validate(&Model{
+			U1: henge.ToStringPtr("https://example.com/path?q=1"),
+			U2: "http://example.com:1234/path?q=1",
+			U3: "scp://example.com:8888",
+		}, valis.EachFields(tagrule.Validate)),
+	)
+	assert.EqualError(
+		v.Validate(&Model{
+			U1: henge.ToStringPtr("rtmp://example.com/path?q=1"),
+			U2: "http://example.com:1234/path?q=1",
+			U3: "http://example.com:8888",
+		}, valis.EachFields(tagrule.Validate)),
+		`(invalid_scheme) .U1 which scheme is not included in [http https]
+(invalid_scheme) .U3 which scheme is not included in [scp]`,
+	)
+}
