@@ -22,8 +22,8 @@ func TestFieldTagRule(t *testing.T) {
 	assert := assert.New(t)
 
 	type User struct {
-		Name string `required:"true"`
-		Age  int    `required:"false"`
+		Name *string `required:"true"`
+		Age  *int    `required:"false"`
 	}
 
 	u := User{}

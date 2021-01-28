@@ -18,25 +18,25 @@ func TestField(t *testing.T) {
 	assert.EqualError(
 		v.Validate(
 			&user,
-			valis.Field(&user.Name, is.Required),
+			valis.Field(&user.Name, is.NonZero),
 		),
-		"(required) .Name is required",
+		"(non_zero) .Name can't be blank (or zero)",
 	)
 	assert.EqualError(
 		v.Validate(
 			&user,
-			valis.Field(&user.Name, is.Required),
-			valis.Field(&user.Age, is.Required),
+			valis.Field(&user.Name, is.NonZero),
+			valis.Field(&user.Age, is.NonZero),
 		),
-		"(required) .Name is required\n(required) .Age is required",
+		"(non_zero) .Name can't be blank (or zero)\n(non_zero) .Age can't be blank (or zero)",
 	)
 
 	alice := User{Name: "Alice", Age: 22}
 	assert.NoError(
 		v.Validate(
 			&alice,
-			valis.Field(&alice.Name, is.Required),
-			valis.Field(&alice.Age, is.Required),
+			valis.Field(&alice.Name, is.NonZero),
+			valis.Field(&alice.Age, is.NonZero),
 		),
 	)
 
@@ -61,10 +61,10 @@ func TestField(t *testing.T) {
 	assert.NoError(
 		v.Validate(&user, valis.Field(&user.Name), valis.Field(&user.Age)),
 	)
-	v.SetCommonRules(is.Required)
+	v.SetCommonRules(is.NonZero)
 	assert.EqualError(
 		v.Validate(&user, valis.Field(&user.Name), valis.Field(&user.Age)),
-		"(required) .Age is required",
+		"(non_zero) .Age can't be blank (or zero)",
 	)
 
 	// NOTE: CommonRules only check to the specified Field.
@@ -83,17 +83,17 @@ func TestEachFields(t *testing.T) {
 
 	u := &User{}
 	assert.EqualError(
-		v.Validate(u, valis.EachFields(is.Required)),
-		"(required) .Name is required\n(required) .Age is required",
+		v.Validate(u, valis.EachFields(is.NonZero)),
+		"(non_zero) .Name can't be blank (or zero)\n(non_zero) .Age can't be blank (or zero)",
 	)
 	u = &User{Name: "Alice", Age: 20}
 	assert.NoError(
-		v.Validate(u, valis.EachFields(is.Required)),
+		v.Validate(u, valis.EachFields(is.NonZero)),
 	)
 
 	// NOTE: it returns an error when the value is not struct
 	assert.EqualError(
-		v.Validate("a", valis.EachFields(is.Required)),
+		v.Validate("a", valis.EachFields(is.NonZero)),
 		"(not_struct) must be any struct",
 	)
 }

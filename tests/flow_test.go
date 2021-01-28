@@ -25,8 +25,8 @@ func TestWhen(t *testing.T) {
 	Any := func(ctx *valis.WhenContext) bool { return true }
 	Never := func(ctx *valis.WhenContext) bool { return false }
 	assert.EqualError(
-		v.Validate("", valis.When(Any, is.Required)),
-		"(required) is required",
+		v.Validate("", valis.When(Any, is.NonZero)),
+		"(non_zero) can't be blank (or zero)",
 	)
 	assert.NoError(v.Validate("", valis.When(Never, is.Required)))
 }
@@ -40,11 +40,11 @@ func TestWhen_ElseIf(t *testing.T) {
 		v.Validate("", valis.When(Never, is.Zero)),
 	)
 	assert.EqualError(
-		v.Validate("", valis.When(Never, is.Zero).ElseIf(Any, is.Required)),
-		"(required) is required",
+		v.Validate("", valis.When(Never, is.Zero).ElseIf(Any, is.NonZero)),
+		"(non_zero) can't be blank (or zero)",
 	)
 	assert.NoError(
-		v.Validate("", valis.When(Any, is.Zero).ElseIf(Any, is.Required)),
+		v.Validate("", valis.When(Any, is.Zero).ElseIf(Any, is.NonZero)),
 	)
 }
 
@@ -59,34 +59,34 @@ func TestWhen_ElseWhen(t *testing.T) {
 	assert.EqualError(
 		v.Validate("",
 			valis.When(Never, is.Zero).
-				ElseWhen(valis.When(Any, is.Required))),
-		"(required) is required",
+				ElseWhen(valis.When(Any, is.NonZero))),
+		"(non_zero) can't be blank (or zero)",
 	)
 	assert.EqualError(
 		v.Validate("",
 			valis.When(Never, is.Zero).
 				ElseIf(Never, is.Zero).
-				ElseWhen(valis.When(Any, is.Required))),
-		"(required) is required",
+				ElseWhen(valis.When(Any, is.NonZero))),
+		"(non_zero) can't be blank (or zero)",
 	)
 	assert.EqualError(
 		v.Validate("",
 			valis.When(Never, is.Zero).
 				ElseWhen(valis.When(Never, is.Zero)).
-				ElseIf(Any, is.Required)),
-		"(required) is required",
+				ElseIf(Any, is.NonZero)),
+		"(non_zero) can't be blank (or zero)",
 	)
 	assert.EqualError(
 		v.Validate("",
 			valis.When(Never, is.Zero).
-				ElseWhen(valis.When(Never, is.Zero).ElseIf(Any, is.Required)).
+				ElseWhen(valis.When(Never, is.Zero).ElseIf(Any, is.NonZero)).
 				ElseIf(Any, is.In(0))),
-		"(required) is required",
+		"(non_zero) can't be blank (or zero)",
 	)
 	assert.NoError(
 		v.Validate("",
 			valis.When(Any, is.Zero).
-				ElseWhen(valis.When(Never, is.Required))),
+				ElseWhen(valis.When(Never, is.NonZero))),
 	)
 }
 
@@ -101,36 +101,36 @@ func TestWhen_Else(t *testing.T) {
 	assert.EqualError(
 		v.Validate("",
 			valis.When(Never, is.Zero).
-				Else(valis.When(Any, is.Required))),
-		"(required) is required",
+				Else(valis.When(Any, is.NonZero))),
+		"(non_zero) can't be blank (or zero)",
 	)
 	assert.EqualError(
 		v.Validate("",
 			valis.When(Never, is.Zero).
 				ElseIf(Never, is.Zero).
-				Else(is.Required)),
-		"(required) is required",
+				Else(is.NonZero)),
+		"(non_zero) can't be blank (or zero)",
 	)
 	assert.EqualError(
 		v.Validate("",
 			valis.When(Never, is.Zero).
-				ElseWhen(valis.When(Any, is.Required)).
+				ElseWhen(valis.When(Any, is.NonZero)).
 				Else(is.In())),
-		"(required) is required",
+		"(non_zero) can't be blank (or zero)",
 	)
 	assert.EqualError(
 		v.Validate("",
 			valis.When(Never, is.Zero).
-				ElseWhen(valis.When(Never, is.Zero).ElseIf(Any, is.Required)).
+				ElseWhen(valis.When(Never, is.Zero).ElseIf(Any, is.NonZero)).
 				Else(is.In())),
-		"(required) is required",
+		"(non_zero) can't be blank (or zero)",
 	)
 	assert.EqualError(
 		v.Validate("",
 			valis.When(Never, is.Zero).
 				ElseWhen(valis.When(Never, is.Zero).ElseIf(Never, is.In())).
-				Else(is.Required)),
-		"(required) is required",
+				Else(is.NonZero)),
+		"(non_zero) can't be blank (or zero)",
 	)
 }
 
@@ -138,11 +138,11 @@ func TestEach(t *testing.T) {
 	assert := assert.New(t)
 
 	assert.EqualError(
-		v.Validate([]string{"a", "", "b"}, valis.Each(is.Required)),
-		"(required) [1] is required",
+		v.Validate([]string{"a", "", "b"}, valis.Each(is.NonZero)),
+		"(non_zero) [1] can't be blank (or zero)",
 	)
 	assert.NoError(
-		v.Validate([]string{"a", "b", "c"}, valis.Each(is.Required)),
+		v.Validate([]string{"a", "b", "c"}, valis.Each(is.NonZero)),
 	)
 
 	value := []*string{
@@ -160,16 +160,16 @@ func TestEach(t *testing.T) {
 		henge.New("c").StringPtr().Value(),
 	}
 	assert.NoError(
-		v.Validate(value, valis.Each(is.Required)),
+		v.Validate(value, valis.Each(is.NonZero)),
 	)
 
 	// NOTE: value must be array or slice.
-	assert.EqualError(v.Validate("", valis.Each(is.Required)), "(not_array) must be any array")
+	assert.EqualError(v.Validate("", valis.Each(is.NonZero)), "(not_array) must be any array")
 
 	// NOTE: CommonRules automatically check.
 	v := valis.NewValidator()
 	v.SetCommonRules()
 	assert.NoError(v.Validate([]string{""}, valis.Each()))
-	v.SetCommonRules(is.Required)
-	assert.EqualError(v.Validate([]string{""}, valis.Each()), "(required) [0] is required")
+	v.SetCommonRules(is.NonZero)
+	assert.EqualError(v.Validate([]string{""}, valis.Each()), "(non_zero) [0] can't be blank (or zero)")
 }

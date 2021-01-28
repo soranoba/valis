@@ -16,6 +16,7 @@ import (
 
 type (
 	requiredRule     struct{}
+	nonZeroRule      struct{}
 	zeroRule         struct{}
 	nilOrNonZeroRule struct{}
 	anyRule          struct{}
@@ -46,10 +47,17 @@ type (
 )
 
 var (
-	// Required is a rule to verify non-zero value.
-	// See reflect.IsZero
+	// Required is a rule to verify non-nil value.
 	Required valis.Rule = &requiredRule{}
+	// NonZero is a rule to verify non-zero value.
+	//
+	// Non-zero value means the value is different from when the variable was initialized.
+	// See also reflect.IsZero
+	NonZero valis.Rule = &nonZeroRule{}
 	// Zero is a rule to verify zero value.
+	//
+	// Zero value means the value is same from when the variable was initialized.
+	// See also reflect.IsZero
 	Zero valis.Rule = &zeroRule{}
 	// NilOrNonZero is a rule to verify nil or non-zero value.
 	NilOrNonZero valis.Rule = &nilOrNonZeroRule{}
@@ -60,9 +68,15 @@ var (
 )
 
 func (rule *requiredRule) Validate(validator *valis.Validator, value interface{}) {
+	if valishelpers.IsNil(value) {
+		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.Required, value))
+	}
+}
+
+func (rule *nonZeroRule) Validate(validator *valis.Validator, value interface{}) {
 	val := reflect.ValueOf(value)
 	if !val.IsValid() || val.IsZero() {
-		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.Required, value))
+		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.NonZero, value))
 	}
 }
 

@@ -19,6 +19,40 @@ type SimpleTestCase struct {
 func TestRequired(t *testing.T) {
 	assert := assert.New(t)
 	testCases := []SimpleTestCase{
+		{"", true},
+		{0, true},
+		{nil, false},
+		{"a", true},
+		{1, true},
+		{[...]string{}, true},
+		{[...]string{""}, true},
+		{[...]string{"abc"}, true},
+		{map[string]string(nil), false},
+		{map[string]string{}, true},
+		{map[string]string{"": ""}, true},
+		{struct{}{}, true},
+		{(*struct{})(nil), false},
+		{struct{ Name string }{"name"}, true},
+	}
+
+	for _, testCase := range testCases {
+		err := valis.Validate(testCase.Value, is.Required)
+		msg := fmt.Sprintf("%#v", testCase)
+		if testCase.IsValid {
+			assert.NoError(err, msg)
+		} else {
+			if assert.Error(err, msg) {
+				details := err.(*valis.ValidationError).Details()
+				assert.Len(details, 1)
+				assert.Equal(code.Required, details[0].Code())
+			}
+		}
+	}
+}
+
+func TestNonZero(t *testing.T) {
+	assert := assert.New(t)
+	testCases := []SimpleTestCase{
 		{"", false},
 		{0, false},
 		{nil, false},
@@ -35,7 +69,7 @@ func TestRequired(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		err := valis.Validate(testCase.Value, is.Required)
+		err := valis.Validate(testCase.Value, is.NonZero)
 		msg := fmt.Sprintf("%#v", testCase)
 		if testCase.IsValid {
 			assert.NoError(err, msg)
@@ -43,7 +77,7 @@ func TestRequired(t *testing.T) {
 			if assert.Error(err, msg) {
 				details := err.(*valis.ValidationError).Details()
 				assert.Len(details, 1)
-				assert.Equal(code.Required, details[0].Code())
+				assert.Equal(code.NonZero, details[0].Code())
 			}
 		}
 	}

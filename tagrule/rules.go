@@ -55,6 +55,12 @@ var (
 		"required": func(v string) ([]valis.Rule, error) { // required
 			return []valis.Rule{is.Required}, nil
 		},
+		"nonzero": func(v string) ([]valis.Rule, error) { // nonzero
+			return []valis.Rule{is.NonZero}, nil
+		},
+		"zero": func(v string) ([]valis.Rule, error) { // zero
+			return []valis.Rule{is.Zero}, nil
+		},
 		"lte": func(v string) ([]valis.Rule, error) { // lte=10
 			var num float64
 			if _, err := SplitAndParseTagValues(v, " ", &num); err != nil {

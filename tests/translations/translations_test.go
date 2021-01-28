@@ -80,6 +80,10 @@ func TestTranslations(t *testing.T) {
 			en: "is required",
 			ja: "は必須です",
 		}),
+		f(code.NonZero)(Results{
+			en: "can't be blank (or zero)",
+			ja: "を空白にすることはできません",
+		}),
 		f(code.NilOrNonZero)(Results{
 			en: "can't be blank (or zero) if specified",
 			ja: "を指定する場合は空白にすることはできません",

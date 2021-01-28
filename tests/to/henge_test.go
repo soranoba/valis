@@ -20,9 +20,9 @@ func init() {
 func TestString(t *testing.T) {
 	assert := assert.New(t)
 
-	assert.EqualError(v.Validate(nil, to.String(is.Required)), "(conversion) can not convert to string")
-	assert.EqualError(v.Validate("", to.String(is.Required)), "(required) is required")
-	assert.NoError(v.Validate(0, to.String(is.Required, is.In("0"))))
+	assert.EqualError(v.Validate(nil, to.String(is.NonZero)), "(conversion) can not convert to string")
+	assert.EqualError(v.Validate("", to.String(is.NonZero)), "(non_zero) can't be blank (or zero)")
+	assert.NoError(v.Validate(0, to.String(is.NonZero, is.In("0"))))
 }
 
 func TestInt(t *testing.T) {
@@ -46,7 +46,7 @@ func TestUint(t *testing.T) {
 
 	assert.NoError(v.Validate("1234", to.Uint(is.In(uint64(1234)))))
 	assert.NoError(v.Validate(1.25, to.Uint(is.In(uint64(1)))))
-	assert.EqualError(v.Validate(-1, to.Uint(is.Required)), "(conversion) can not convert from int to uint64")
+	assert.EqualError(v.Validate(-1, to.Uint(is.NonZero)), "(conversion) can not convert from int to uint64")
 }
 
 func TestFloat(t *testing.T) {
@@ -54,7 +54,7 @@ func TestFloat(t *testing.T) {
 
 	assert.NoError(v.Validate("1.25", to.Float(is.In(1.25))))
 	assert.EqualError(v.Validate("0", to.Float(is.In(0))), "(inclusion) is not included in [0]")
-	assert.EqualError(v.Validate("aaa", to.Float(is.Required)), "(conversion) can not convert from string to float64")
+	assert.EqualError(v.Validate("aaa", to.Float(is.NonZero)), "(conversion) can not convert from string to float64")
 }
 
 func TestMap(t *testing.T) {

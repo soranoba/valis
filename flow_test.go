@@ -14,14 +14,14 @@ func ExampleWhen() {
 		return reflect.ValueOf(ctx.Value()).Kind() == reflect.Int
 	}
 
-	if err := v.Validate(0, valis.When(isInt, is.Required)); err != nil {
+	if err := v.Validate(0, valis.When(isInt, is.NonZero)); err != nil {
 		fmt.Println(err)
 	}
-	if err := v.Validate("1", valis.When(isInt, is.Required).Else(is.In("a", "b", "c"))); err != nil {
+	if err := v.Validate("1", valis.When(isInt, is.NonZero).Else(is.In("a", "b", "c"))); err != nil {
 		fmt.Println(err)
 	}
 
 	// Output:
-	// (required) is required
+	// (non_zero) can't be blank (or zero)
 	// (inclusion) is not included in [a b c]
 }

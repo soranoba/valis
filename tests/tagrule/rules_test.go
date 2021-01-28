@@ -9,21 +9,17 @@ import (
 )
 
 var (
-	v *valis.Validator
-)
-
-func init() {
 	v = valis.NewValidator()
-	v.SetCommonRules()
-}
+)
 
 func TestRequired(t *testing.T) {
 	assert := assert.New(t)
 
 	type User struct {
-		FirstName string `required:"true"`
-		LastName  string `required:"false"`
-		Age       int    `required:"True"`
+		FirstName *string `required:"true"`
+		LastName  *string `required:"false"`
+		Nickname  string  `required:"true"`
+		Age       *int64  `required:"True"`
 	}
 
 	assert.EqualError(
@@ -32,7 +28,10 @@ func TestRequired(t *testing.T) {
 			"(required) .Age is required",
 	)
 	assert.NoError(
-		v.Validate(&User{FirstName: "Taro", LastName: "Soto", Age: 20}, valis.EachFields(tagrule.Required)),
+		v.Validate(&User{
+			FirstName: henge.ToStringPtr("Taro"),
+			Age:       henge.ToIntPtr(20),
+		}, valis.EachFields(tagrule.Required)),
 	)
 }
 
@@ -107,12 +106,11 @@ func TestValidate_required(t *testing.T) {
 	}
 	assert.EqualError(
 		v.Validate(User{}, valis.EachFields(tagrule.Validate)),
-		"(required) .FirstName is required\n(required) .LastName is required",
+		"(required) .LastName is required",
 	)
 	assert.NoError(
 		v.Validate(&User{
-			FirstName: "Taro",
-			LastName:  henge.ToStringPtr("Tanaka"),
+			LastName: henge.ToStringPtr("Tanaka"),
 		}, valis.EachFields(tagrule.Validate)),
 	)
 }

@@ -10,12 +10,12 @@ import (
 func TestValidator_Validate(t *testing.T) {
 	assert := assert.New(t)
 
-	assert.Error(valis.NewValidator().Validate("", is.Required))
-	assert.NoError(valis.NewValidator().Validate("a"), is.Required)
+	assert.Error(valis.NewValidator().Validate("", is.NonZero))
+	assert.NoError(valis.NewValidator().Validate("a"), is.NonZero)
 
 	// NOTE: it returns an error if any rules are not met.
-	assert.Error(valis.NewValidator().Validate("", is.Any, is.Required))
-	assert.NoError(valis.NewValidator().Validate("a", is.Any, is.Required))
+	assert.Error(valis.NewValidator().Validate("", is.Any, is.NonZero))
+	assert.NoError(valis.NewValidator().Validate("a", is.Any, is.NonZero))
 }
 
 func TestValidator_AddCommonRules(t *testing.T) {
@@ -36,7 +36,7 @@ func TestValidator_SetCommonRules(t *testing.T) {
 	assert := assert.New(t)
 
 	v1 := valis.NewValidator()
-	v1.SetCommonRules(is.Required)
+	v1.SetCommonRules(is.NonZero)
 
 	// NOTE: CommonRules automatically check.
 	assert.Error(v1.Validate(""))
@@ -50,7 +50,7 @@ func TestValidator_SetCommonRules(t *testing.T) {
 	assert.NoError(v1.Validate(""))
 	assert.Error(v2.Validate(""))
 
-	v1.SetCommonRules(is.Required)
+	v1.SetCommonRules(is.NonZero)
 	v2.SetCommonRules()
 	assert.Error(v1.Validate(""))
 	assert.NoError(v2.Validate(""))

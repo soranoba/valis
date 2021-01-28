@@ -28,6 +28,7 @@ const (
 	Custom             = "custom" // %[1]w = Error
 	Invalid            = "invalid"
 	Required           = "required"
+	NonZero            = "non_zero"
 	NilOrNonZero       = "nil_or_non_zero"
 	ZeroOnly           = "zero_only"
 	TooLongLength      = "too_long_length"  // %[1]d = Count

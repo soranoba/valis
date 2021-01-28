@@ -19,8 +19,8 @@ func (h *TagValueHandler) ParseTagValue(tagValue string) ([]valis.Rule, error) {
 
 func ExampleNewFieldTagRule() {
 	type User struct {
-		Name string `required:"true"`
-		Age  int    `required:"true"`
+		Name *string `required:"true"`
+		Age  *int    `required:"true"`
 	}
 
 	v := valis.NewValidator()

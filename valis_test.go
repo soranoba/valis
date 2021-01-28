@@ -25,7 +25,7 @@ func Example() {
 	u := &User{}
 	if err := valis.Validate(
 		&u,
-		valis.Field(&u.Name, is.Required),
+		valis.Field(&u.Name, is.NonZero),
 		valis.Field(&u.Age, is.Min(20)),
 	); err != nil {
 		fmt.Println(err)
@@ -35,14 +35,14 @@ func Example() {
 	u.Age = 20
 	if err := valis.Validate(
 		&u,
-		valis.Field(&u.Name, is.Required),
+		valis.Field(&u.Name, is.NonZero),
 		valis.Field(&u.Age, is.Min(20)),
 	); err != nil {
 		fmt.Println(err)
 	}
 
 	// Output:
-	// (required) .Name is required
+	// (non_zero) .Name can't be blank (or zero)
 	// (gte) .Age must be greater than or equal to 20
 }
 
@@ -62,14 +62,14 @@ func Example_customizeError() {
 	u := User{}
 	if err := v.Validate(
 		&u,
-		valis.Field(&u.Name, is.Required),
+		valis.Field(&u.Name, is.NonZero),
 		valis.Field(&u.Age, is.Min(20)),
 	); err != nil {
 		fmt.Println(err)
 	}
 
 	// Output:
-	// (required) .name is required
+	// (non_zero) .name can't be blank (or zero)
 	// (gte) .age must be greater than or equal to 20
 }
 
@@ -89,7 +89,7 @@ func Example_translate() {
 	u := User{}
 	if err := valis.Validate(
 		&u,
-		valis.Field(&u.Name, is.Required),
+		valis.Field(&u.Name, is.NonZero),
 		valis.Field(&u.Age, is.Min(20)),
 	); err != nil {
 		for _, lang := range []language.Tag{language.English, language.Japanese} {
@@ -107,7 +107,7 @@ func Example_translate() {
 	//     "must be greater than or equal to 20"
 	//   ],
 	//   ".Name": [
-	//     "is required"
+	//     "can't be blank (or zero)"
 	//   ]
 	// }
 	// {
@@ -115,15 +115,15 @@ func Example_translate() {
 	//     "は20より大きい値にする必要があります"
 	//   ],
 	//   ".Name": [
-	//     "は必須です"
+	//     "を空白にすることはできません"
 	//   ]
 	// }
 }
 
 func Example_structTag() {
 	type User struct {
-		Name string `required:"true"`
-		Age  int    `validate:"min=20"`
+		Name *string `required:"true"`
+		Age  int     `validate:"min=20"`
 	}
 
 	v := valis.NewValidator()
@@ -164,10 +164,10 @@ func Example_validatable() {
 
 func Example_nestedStruct() {
 	type User struct {
-		Name    string `required:"true"`
-		Age     int    `validate:"min=20"`
+		Name    *string `required:"true"`
+		Age     int     `validate:"min=20"`
 		Company struct {
-			Location string `required:"true"`
+			Location *string `required:"true"`
 		}
 	}
 

@@ -28,6 +28,7 @@ func DefaultJapanese(c *catalog.Builder) {
 	c.Set(tag, code.Custom, catalog.String("%[1]v"))
 	c.Set(tag, code.Invalid, catalog.String("は不正な値です"))
 	c.Set(tag, code.Required, catalog.String("は必須です"))
+	c.Set(tag, code.NonZero, catalog.String("を空白にすることはできません"))
 	c.Set(tag, code.NilOrNonZero, catalog.String("を指定する場合は空白にすることはできません"))
 	c.Set(tag, code.ZeroOnly, catalog.String("は指定できません"))
 

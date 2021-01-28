@@ -29,6 +29,7 @@ func DefaultEnglish(c *catalog.Builder) {
 	c.Set(tag, code.Custom, catalog.String("%[1]v"))
 	c.Set(tag, code.Invalid, catalog.String("is invalid"))
 	c.Set(tag, code.Required, catalog.String("is required"))
+	c.Set(tag, code.NonZero, catalog.String("can't be blank (or zero)"))
 	c.Set(tag, code.NilOrNonZero, catalog.String("can't be blank (or zero) if specified"))
 	c.Set(tag, code.ZeroOnly, catalog.String("must be blank"))
 

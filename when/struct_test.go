@@ -9,18 +9,18 @@ import (
 
 func ExampleHasFieldTag() {
 	type User struct {
-		Name string `required:"true"`
+		Name string `required:"false"`
 	}
 
 	v := valis.NewValidator()
 	u := User{}
 	if err := v.Validate(
 		&u,
-		valis.Field(&u.Name, when.HasFieldTag("required", is.Required)),
+		valis.Field(&u.Name, when.HasFieldTag("required", is.NonZero)),
 	); err != nil {
 		fmt.Println(err)
 	}
 
 	// Output:
-	// (required) .Name is required
+	// (non_zero) .Name can't be blank (or zero)
 }
