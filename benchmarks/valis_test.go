@@ -9,6 +9,11 @@ import (
 )
 
 func BenchmarkValis_SimpleStruct_tag(b *testing.B) {
+	type Simple struct {
+		FirstName string `json:"first_name" validate:"min=1,max=20"`
+		LastName  string `json:"last_name" validate:"min=1,max=20"`
+	}
+
 	v := valis.NewValidator()
 	v.SetCommonRules()
 	b.ResetTimer()
@@ -27,6 +32,11 @@ func BenchmarkValis_SimpleStruct_tag(b *testing.B) {
 }
 
 func BenchmarkValis_SimpleStruct_field(b *testing.B) {
+	type Simple struct {
+		FirstName string `json:"first_name"`
+		LastName  string `json:"last_name"`
+	}
+
 	v := valis.NewValidator()
 	v.SetCommonRules()
 	b.ResetTimer()
@@ -35,8 +45,8 @@ func BenchmarkValis_SimpleStruct_field(b *testing.B) {
 		s := &Simple{}
 		if err := v.Validate(
 			s,
-			valis.Field(&s.FirstName, is.Required, is.LengthBetween(0, 20)),
-			valis.Field(&s.LastName, is.Required, is.LengthBetween(0, 20)),
+			valis.Field(&s.FirstName, is.LengthBetween(1, 20)),
+			valis.Field(&s.LastName, is.LengthBetween(1, 20)),
 		); err == nil {
 			panic("invalid results")
 		}
@@ -44,8 +54,8 @@ func BenchmarkValis_SimpleStruct_field(b *testing.B) {
 		s = &Simple{FirstName: "123456789012345678901", LastName: "123456789012345678901"}
 		if err := v.Validate(
 			s,
-			valis.Field(&s.FirstName, is.Required, is.LengthBetween(0, 20)),
-			valis.Field(&s.LastName, is.Required, is.LengthBetween(0, 20)),
+			valis.Field(&s.FirstName, is.LengthBetween(1, 20)),
+			valis.Field(&s.LastName, is.LengthBetween(1, 20)),
 		); err == nil {
 			panic("invalid results")
 		}

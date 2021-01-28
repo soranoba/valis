@@ -6,6 +6,11 @@ import (
 )
 
 func BenchmarkOzzo_SimpleStruct(b *testing.B) {
+	type Simple struct {
+		FirstName string `json:"first_name"`
+		LastName  string `json:"last_name"`
+	}
+
 	for i := 0; i < b.N; i++ {
 		s := &Simple{}
 		if err := validation.ValidateStruct(

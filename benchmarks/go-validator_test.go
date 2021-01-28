@@ -7,6 +7,11 @@ import (
 )
 
 func BenchmarkGoPlayground_SimpleStruct(b *testing.B) {
+	type Simple struct {
+		FirstName string `json:"first_name" validate:"required,max=20"`
+		LastName  string `json:"last_name" validate:"required,max=20"`
+	}
+
 	validate := validator.New()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
