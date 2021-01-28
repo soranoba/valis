@@ -124,7 +124,7 @@ var (
 			if v == "" {
 				return []valis.Rule{is.URL()}, nil
 			}
-			return []valis.Rule{is.URL(strings.Split(v, " ")...)}, nil
+			return []valis.Rule{when.IsNil().Else(is.URL(strings.Split(v, " ")...))}, nil
 		},
 	}
 )

@@ -314,6 +314,10 @@ func TestValidate_url(t *testing.T) {
 		U2 string  `validate:"url"`
 		U3 string  `validate:"url=scp"`
 	}
+	assert.EqualError(
+		v.Validate(&Model{}, valis.EachFields(tagrule.Validate)),
+		"(invalid_scheme) .U3 which scheme is not included in [scp]",
+	)
 	assert.NoError(
 		v.Validate(&Model{
 			U1: henge.ToStringPtr("https://example.com/path?q=1"),
