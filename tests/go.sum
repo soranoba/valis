@@ -2,8 +2,8 @@ github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/soranoba/henge v1.2.0 h1:wARjZBqhGArqfAnJ03JWw+a/C+xWgH+e+MAj2CcRTEA=
-github.com/soranoba/henge v1.2.0/go.mod h1:UUQniwleSKvcof7CqB5ezUC5hnPX1fE8pHVJDL1KZIQ=
+github.com/soranoba/henge/v2 v2.0.0 h1:/hfkHQXLl9aR8aMYjiXj9r+G246zTEiqu98wrfhP5b0=
+github.com/soranoba/henge/v2 v2.0.0/go.mod h1:aRCYZs9FpmmLBf0OjpLSaVIWj/jrUQnR0mubGGbohfY=
 github.com/stretchr/objx v0.1.0 h1:4G4v2dO3VZwixGIRoQ5Lfboy6nUhCyYzaqnIAPPhYs4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=

@@ -1,11 +1,12 @@
 package tests
 
 import (
-	"github.com/soranoba/henge"
+	"testing"
+
+	"github.com/soranoba/henge/v2"
 	"github.com/soranoba/valis"
 	"github.com/soranoba/valis/is"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestOr(t *testing.T) {

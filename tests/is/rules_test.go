@@ -2,13 +2,14 @@ package is_test
 
 import (
 	"fmt"
-	"github.com/soranoba/henge"
+	"math"
+	"testing"
+
+	"github.com/soranoba/henge/v2"
 	"github.com/soranoba/valis"
 	"github.com/soranoba/valis/code"
 	"github.com/soranoba/valis/is"
 	"github.com/stretchr/testify/assert"
-	"math"
-	"testing"
 )
 
 type SimpleTestCase struct {

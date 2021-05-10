@@ -2,10 +2,11 @@ package to
 
 import (
 	"fmt"
-	"github.com/soranoba/henge"
+	"testing"
+
+	"github.com/soranoba/henge/v2"
 	"github.com/soranoba/valis"
 	"github.com/soranoba/valis/is"
-	"testing"
 )
 
 func TestHengeError(t *testing.T) {

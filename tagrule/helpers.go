@@ -2,8 +2,9 @@ package tagrule
 
 import (
 	"errors"
-	"github.com/soranoba/henge"
 	"strings"
+
+	"github.com/soranoba/henge/v2"
 )
 
 var (
