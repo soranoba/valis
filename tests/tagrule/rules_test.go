@@ -1,11 +1,12 @@
 package tagrule_test
 
 import (
-	"github.com/soranoba/henge"
+	"testing"
+
+	"github.com/soranoba/henge/v2"
 	"github.com/soranoba/valis"
 	"github.com/soranoba/valis/tagrule"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 var (

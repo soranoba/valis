@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"unicode/utf8"
 
-	"github.com/soranoba/henge"
+	"github.com/soranoba/henge/v2"
 	"github.com/soranoba/valis"
 	"github.com/soranoba/valis/code"
 	valishelpers "github.com/soranoba/valis/helpers"

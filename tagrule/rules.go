@@ -2,15 +2,16 @@
 package tagrule
 
 import (
-	"github.com/soranoba/henge"
-	"github.com/soranoba/valis"
-	"github.com/soranoba/valis/is"
-	"github.com/soranoba/valis/to"
-	"github.com/soranoba/valis/when"
 	"math"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/soranoba/henge/v2"
+	"github.com/soranoba/valis"
+	"github.com/soranoba/valis/is"
+	"github.com/soranoba/valis/to"
+	"github.com/soranoba/valis/when"
 )
 
 type (

@@ -1,13 +1,14 @@
 package tests
 
 import (
-	"github.com/soranoba/henge"
+	"strings"
+	"testing"
+
+	"github.com/soranoba/henge/v2"
 	"github.com/soranoba/valis"
 	"github.com/soranoba/valis/code"
 	"github.com/soranoba/valis/is"
 	"github.com/stretchr/testify/assert"
-	"strings"
-	"testing"
 )
 
 func TestKey(t *testing.T) {

@@ -1,7 +1,7 @@
 package to_test
 
 import (
-	"github.com/soranoba/henge"
+	"github.com/soranoba/henge/v2"
 	"github.com/soranoba/valis"
 	"github.com/soranoba/valis/is"
 	"github.com/soranoba/valis/to"

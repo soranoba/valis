@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/soranoba/henge"
+	"github.com/soranoba/henge/v2"
 	"github.com/soranoba/valis"
 )
 
