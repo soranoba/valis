@@ -21,6 +21,7 @@ func DefaultEnglish(c *catalog.Builder) {
 
 	// not found error
 	c.Set(tag, code.NoKey, catalog.String("requires the value at the key (%[1]v)"))
+	c.Set(tag, code.OutOfRange, catalog.String("requires more than %[1]d elements"))
 
 	// convert error
 	c.Set(tag, code.ConversionFailed, catalog.String("%[1]v"))

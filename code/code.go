@@ -15,7 +15,8 @@ const (
 
 // Not found error codes.
 const (
-	NoKey = "no_key" // %[1]v = Key
+	NoKey      = "no_key"       // %[1]v = Key
+	OutOfRange = "out_of_range" // %[1]d = Index, %[2]d = Length
 )
 
 // Conversion error codes.

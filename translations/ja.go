@@ -20,6 +20,7 @@ func DefaultJapanese(c *catalog.Builder) {
 
 	// not found error
 	c.Set(tag, code.NoKey, catalog.String("requires the value at the key (%[1]v)"))
+	c.Set(tag, code.OutOfRange, catalog.String("%[1]d要素よりも多くの要素が必要です"))
 
 	// convert error
 	c.Set(tag, code.ConversionFailed, catalog.String("%[1]v"))
