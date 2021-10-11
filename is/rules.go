@@ -42,7 +42,8 @@ type (
 		isExcludingUpper bool
 	}
 	matchRule struct {
-		re *regexp.Regexp
+		re   *regexp.Regexp
+		code string
 	}
 )
 
@@ -65,6 +66,12 @@ var (
 	Any valis.Rule = &anyRule{}
 	// Never is a rule indicating that any value is not acceptable.
 	Never valis.Rule = &neverRule{}
+	// Email is a rule to verify email address.
+	// W3C version. ref: https://html.spec.whatwg.org/multipage/input.html#email-state-(type=email)
+	Email = &matchRule{
+		re:   regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"),
+		code: code.InvalidEmailFormat,
+	}
 )
 
 func (rule *requiredRule) Validate(validator *valis.Validator, value interface{}) {
@@ -382,6 +389,10 @@ func (rule *matchRule) Validate(validator *valis.Validator, value interface{}) {
 		return
 	}
 	if !rule.re.MatchString(val.Interface().(string)) {
-		validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.RegexpMismatch, value, rule.re.String()))
+		if rule.code != "" {
+			validator.ErrorCollector().Add(validator.Location(), valis.NewError(rule.code, value))
+		} else {
+			validator.ErrorCollector().Add(validator.Location(), valis.NewError(code.RegexpMismatch, value, rule.re.String()))
+		}
 	}
 }
