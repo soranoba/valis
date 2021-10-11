@@ -46,4 +46,5 @@ func DefaultJapanese(c *catalog.Builder) {
 	c.Set(tag, code.RegexpMismatch, catalog.String("は正規表現 (%[1]s) に一致しません"))
 	c.Set(tag, code.InvalidURLFormat, catalog.String("は不正なURLです"))
 	c.Set(tag, code.InvalidScheme, catalog.String("のスキームは %[1]v のいずれかである必要があります"))
+	c.Set(tag, code.InvalidEmailFormat, catalog.String("は不正なメールアドレスです"))
 }

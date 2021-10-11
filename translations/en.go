@@ -59,4 +59,5 @@ func DefaultEnglish(c *catalog.Builder) {
 	c.Set(tag, code.RegexpMismatch, catalog.String("is a mismatch with the regular expression. (%[1]s)"))
 	c.Set(tag, code.InvalidURLFormat, catalog.String("is an invalid url format"))
 	c.Set(tag, code.InvalidScheme, catalog.String("which scheme is not included in %[1]v"))
+	c.Set(tag, code.InvalidEmailFormat, catalog.String("is an invalid email address"))
 }

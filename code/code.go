@@ -44,4 +44,5 @@ const (
 	RegexpMismatch     = "regexp"           // %[1]s = regexp
 	InvalidURLFormat   = "invalid_url"      // %[1]v = Error
 	InvalidScheme      = "invalid_scheme"   // %[1]v = List
+	InvalidEmailFormat = "invalid_email"
 )

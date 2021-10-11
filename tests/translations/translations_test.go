@@ -140,6 +140,10 @@ func TestTranslations(t *testing.T) {
 			en: "which scheme is not included in [http https]",
 			ja: "のスキームは [http https] のいずれかである必要があります",
 		}),
+		f(code.InvalidEmailFormat)(Results{
+			en: "is an invalid email address",
+			ja: "は不正なメールアドレスです",
+		}),
 	}
 
 	c := translations.NewCatalog()

@@ -476,3 +476,32 @@ func TestMatch(t *testing.T) {
 		valis.Validate(henge.New("123456789").StringPtr().Value(), is.MatchString("^[0-9]+$")),
 	)
 }
+
+func TestEmail(t *testing.T) {
+	assert := assert.New(t)
+
+	assert.NoError(
+		valis.Validate("Abc@example.com", is.Email),
+	)
+	assert.NoError(
+		valis.Validate("Abc.123@example.com", is.Email),
+	)
+	assert.NoError(
+		valis.Validate("!#$%&'*+-/=?^_`.{|}~@example.com", is.Email),
+	)
+	assert.NoError(
+		valis.Validate("Abc..@example.com", is.Email),
+	)
+	assert.EqualError(
+		valis.Validate("Abc...example.com", is.Email),
+		"(invalid_email) is an invalid email address",
+	)
+	assert.EqualError(
+		valis.Validate("Abc...@example@a.com", is.Email),
+		"(invalid_email) is an invalid email address",
+	)
+	assert.EqualError(
+		valis.Validate("", is.Email),
+		"(invalid_email) is an invalid email address",
+	)
+}
