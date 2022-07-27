@@ -267,6 +267,40 @@ func TestValidate_max(t *testing.T) {
 	)
 }
 
+func TestValidate_len(t *testing.T) {
+	assert := assert.New(t)
+
+	type User struct {
+		Name   *string           `validate:"len=5"`
+		Age    *int64            `validate:"len=5"`
+		Tags   []string          `validate:"len=5"`
+		Params map[string]string `validate:"len=5"`
+	}
+	assert.NoError(
+		v.Validate(User{}, valis.EachFields(tagrule.Validate)),
+	)
+	assert.EqualError(
+		v.Validate(User{
+			Name:   henge.ToStringPtr("123"),
+			Age:    henge.ToIntPtr(5),
+			Tags:   []string{"1", "2", "3"},
+			Params: map[string]string{"a": "", "b": "", "c": ""},
+		}, valis.EachFields(tagrule.Validate)),
+		`(too_short_length) .Name is too short length (minimum is 5 characters)
+(not_iterable) .Age not_iterable
+(too_short_len) .Tags is too few elements (minimum is 5 elements)
+(too_short_len) .Params is too few elements (minimum is 5 elements)`,
+	)
+	assert.NoError(
+		v.Validate(User{
+			Name:   henge.ToStringPtr("🍺🍺🍺🍺🍺"),
+			Age:    nil,
+			Tags:   []string{"1", "2", "3", "4", "5"},
+			Params: map[string]string{"1": "", "2": "", "3": "", "4": "", "5": ""},
+		}, valis.EachFields(tagrule.Validate)),
+	)
+}
+
 func TestValidate_oneof(t *testing.T) {
 	assert := assert.New(t)
 
