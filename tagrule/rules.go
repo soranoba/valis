@@ -114,6 +114,17 @@ var (
 					Else(is.LenBetween(0, max)),
 			}, nil
 		},
+		"len": func(v string) ([]valis.Rule, error) {
+			var length int
+			if _, err := SplitAndParseTagValues(v, " ", &length); err != nil {
+				return nil, err
+			}
+			return []valis.Rule{
+				when.IsNil().
+					ElseWhen(when.IsTypeOrElem(reflect.TypeOf((*string)(nil)), is.LengthBetween(length, length))).
+					Else(is.LenBetween(length, length)),
+			}, nil
+		},
 		"oneof": func(v string) ([]valis.Rule, error) { // oneof=1 2
 			if v == "" {
 				return nil, errInsufficientNumberOfTagParameters
