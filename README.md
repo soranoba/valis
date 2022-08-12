@@ -99,7 +99,11 @@ func main() {
 
 	v := valis.NewValidator()
 	// Use the CommonRule if you want to automatically search and validate all hierarchies.
-	v.SetCommonRules(when.IsStruct(valis.EachFields(tagrule.Required, tagrule.Validate)))
+	v.SetCommonRules(
+		when.IsStruct(valis.EachFields(tagrule.Required, tagrule.Validate)).
+			ElseWhen(when.IsSliceOrArray(valis.Each( /* only common rules */ ))).
+			ElseWhen(when.IsMap(valis.EachValues( /* only common rules */ ))),
+	)
 
 	user := User{}
 	if err := v.Validate(&user); err != nil {

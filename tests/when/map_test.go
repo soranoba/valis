@@ -19,6 +19,30 @@ func init() {
 	v.SetCommonRules()
 }
 
+func TestIsMap(t *testing.T) {
+	assert := assert.New(t)
+
+	type User struct {
+		Name string
+	}
+
+	assert.EqualError(
+		v.Validate("", is.NonZero),
+		"(non_zero) can't be blank (or zero)",
+	)
+	assert.NoError(
+		v.Validate("", when.IsMap(is.NonZero)),
+	)
+
+	assert.EqualError(
+		v.Validate((map[string]User)(nil), when.IsMap(is.NonZero)),
+		"(non_zero) can't be blank (or zero)",
+	)
+	assert.NoError(
+		v.Validate(map[string]User{}, when.IsMap(is.NonZero)),
+	)
+}
+
 func TestHasKey(t *testing.T) {
 	assert := assert.New(t)
 
