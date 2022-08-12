@@ -3,6 +3,7 @@ package tests
 import (
 	"github.com/soranoba/valis"
 	"github.com/soranoba/valis/is"
+	"github.com/soranoba/valis/when"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -95,5 +96,28 @@ func TestEachFields(t *testing.T) {
 	assert.EqualError(
 		v.Validate("a", valis.EachFields(is.NonZero)),
 		"(not_struct) must be any struct",
+	)
+}
+
+func TestEachFields_commonRule(t *testing.T) {
+	assert := assert.New(t)
+	type User struct {
+		Name *string
+	}
+	type Group struct {
+		Owner *User
+		Users []*User
+	}
+
+	g := &Group{Owner: &User{}, Users: []*User{&User{}}}
+	v := valis.NewValidator()
+	v.SetCommonRules(
+		when.IsStruct(valis.EachFields(is.Required)).
+			ElseWhen(when.IsSliceOrArray(valis.Each( /* only common rules */ ))).
+			ElseWhen(when.IsMap(valis.EachValues( /* only common rules */ ))),
+	)
+	assert.EqualError(
+		v.Validate(g),
+		"(required) .Owner.Name is required\n(required) .Users[0].Name is required",
 	)
 }
