@@ -58,5 +58,7 @@ func (r *fieldTagRule) Validate(validator *Validator, value interface{}) {
 		r.cache[tag] = rules
 		r.lock.Unlock()
 	}
-	And(rules...).Validate(validator, value)
+	for _, rule := range rules {
+		rule.Validate(validator, value)
+	}
 }
