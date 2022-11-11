@@ -1,6 +1,7 @@
 package tagrule_test
 
 import (
+	"github.com/soranoba/valis/when"
 	"testing"
 
 	"github.com/soranoba/henge/v2"
@@ -12,6 +13,29 @@ import (
 var (
 	v = valis.NewValidator()
 )
+
+func TestTagRule_noExecuteValidationsWithCommonRules(t *testing.T) {
+	assert := assert.New(t)
+
+	type User struct {
+		FirstName *string `required:"true"`
+	}
+	type Response struct {
+		Data []User `required:"true" validate:"min=1"`
+	}
+
+	v := valis.NewValidator()
+	v.SetCommonRules(
+		when.IsStruct(valis.EachFields(tagrule.Required, tagrule.Validate)).
+			ElseWhen(when.IsSliceOrArray(valis.Each( /* Only common rules */ ))),
+	)
+
+	// NOTE: Make sure that no duplicated errors.
+	assert.EqualError(
+		v.Validate(Response{Data: []User{{}}}),
+		"(required) .Data[0].FirstName is required",
+	)
+}
 
 func TestRequired(t *testing.T) {
 	assert := assert.New(t)
